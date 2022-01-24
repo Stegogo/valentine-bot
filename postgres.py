@@ -8,8 +8,10 @@ class User(db.Model):
     __tablename__ = 'messages'
 
     id = db.Column(db.Integer(), primary_key=True)
-    username = db.Column(db.Unicode(), default='noname')
-    message_for_user = db.Column(db.Unicode(), default='Empty')
+    username = db.Column(db.Unicode(), default='nonamer')
+    username_type = db.Column(db.Unicode(), default='noname')
+    message_for_user = db.Column(db.Unicode(), default='message')
+
 
 
 async def main():
