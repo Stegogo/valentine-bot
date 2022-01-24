@@ -1,0 +1,4 @@
+import postgres
+
+
+postgres.main()
