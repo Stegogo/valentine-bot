@@ -18,12 +18,9 @@ async def send_welcome(message: types.Message):
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         print("Вас нет в базе данных")
         await postgres.create(message.from_user.id)
+        await message.answer('Отправь нам @юзернейм твоей радости🥰')
+        await Letter_class.Letter.q_username.set()
 
-
-@dp.message_handler(Command('love'), state=None)
-async def enter_username(message: types.Message):
-    await message.answer('Отправь нам @юзернейм твоей радости🥰')
-    await Letter_class.Letter.q_username.set()
 
 
 @dp.message_handler(state=Letter_class.Letter.q_username)

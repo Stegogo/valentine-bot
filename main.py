@@ -7,14 +7,16 @@ tg_token = data.token
 
 # Initialize bot and dispatcher
 bot = Bot(token=tg_token)
-dp = Dispatcher(bot)
 storage = MemoryStorage()
+dp = Dispatcher(bot, storage=storage)
 
 
+import postgres
 
 
 
 if __name__ == '__main__':
+    from handlers import dp
     executor.start_polling(dp, skip_updates=True)
 
 
