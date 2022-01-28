@@ -3,8 +3,21 @@ import Letter_class
 from main import bot, dp
 from keyboard import keyboard
 from aiogram import types
+import postgres
 
 from aiogram.dispatcher.filters import Command
+
+@dp.message_handler(commands=['start'])
+async def send_welcome(message: types.Message):
+    users = await postgres.main()
+
+    if message.from_user.id in users:
+        #Кидаем здесь нужный стейт
+        print("Вы есть в базе данных")
+    else:
+        await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
+        print("Вас нет в базе данных")
+        await postgres.create(message.from_user.id)
 
 
 @dp.message_handler(Command('love'), state=None)
