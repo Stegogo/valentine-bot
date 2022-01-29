@@ -7,10 +7,16 @@ db = Gino()
 class User(db.Model):
     __tablename__ = 'messages'
 
-    id = db.Column(db.Integer(), primary_key=True)
-    username = db.Column(db.Unicode(), default='empty')
-    username_type = db.Column(db.Unicode(), default='empty')
-    message_for_user = db.Column(db.Unicode(), default='empty')
+    id = Column(db.Integer, Sequence("user_id_seq"), primary_key=True)
+    tg_id = Column(db.Integer)
+    username = Column(db.String(200))
+    firstname = Column(db.String(200))
+    lastname = Column(db.String(200))
+    fullname = Column(db.String(200))
+    is_blocked_by_bot = Column(db.Boolean)
+    is_bot_blocked = Column(db.Boolean)
+    language = Column(db.String(200))
+    is_admin = Column(db.Boolean)
 
 
 
@@ -36,10 +42,13 @@ async def main():
     await db.pop_bind().close()
     return s
 
-async def create(id):
-    await db.set_bind(data.host)
-    user = await User.create(id=id)
 
+async def get_users():
+    users = await User.query.gino.all()
+    return users
 
-asyncio.get_event_loop().run_until_complete(main())
+async def get_user(id):
+    user = await User.query.where(User.id == id).gino.first()
+    return user
+
 

@@ -1,36 +1,75 @@
 from aiogram.dispatcher import FSMContext
-import Letter_class
+from states import Letter
 from main import bot, dp
-from keyboard import keyboard
+from keyboard import  is_correct_keyboard
 from aiogram import types
 import postgres
 
 from aiogram.dispatcher.filters import Command
 
+@dp.my_chat_member_handler()
+async def chat_update(my_chat_member: types.ChatMemberUpdated):
+    user = types.User.get_current()
+    user_in_DB: User = await get_user(user.id)
+    if user_in_DB:
+        if my_chat_member.new_chat_member.status == "kicked":
+            text = f'<a href="tg://user?id={str(user_in_DB.tg_id)}">{str(user_in_DB.fullname)}</a> заблокировал бота'
+            await bot.send_message(chat_id=243568187, text=text, parse_mode="HTML")
+            await user_in_DB.update(is_bot_blocked=True).apply()
+        elif my_chat_member.new_chat_member.status == "member":
+
+            text = f'<a href="tg://user?id={str(user_in_DB.tg_id)}">{str(user_in_DB.fullname)}</a> разблокировал бота'
+            await bot.send_message(chat_id=243568187, text=text, parse_mode="HTML")
+            await user_in_DB.update(is_bot_blocked=False).apply()
+
+
+
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
+
+    user = types.User.get_current()
+    tg_id = user.id
+    isUserAlreadyInDB = await get_user(tg_id)
     users = await postgres.main()
 
-    if message.from_user.id in users:
-        #Кидаем здесь нужный стейт
-        print("Вы есть в базе данных")
-    else:
+    if not isUserAlreadyInDB:
+
+        user_in_db = postgres.User()
+        user_in_db.username = user.username
+        user_in_db.fullname = user.fullname
+        await user_in_db.create()
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         print("Вас нет в базе данных")
         await postgres.create(message.from_user.id)
         await message.answer('Отправь нам @юзернейм твоей радости🥰')
-        await Letter_class.Letter.q_username.set()
+        await Letter.q_username.set()
+    else:
+        # Кидаем здесь нужный стейт
+        print("Вы есть в базе данных")
+        state = Dispatcher.get_current().current_state()
+        if state == Letter.q_username:
+            await message.answer('Отправь нам @юзернейм твоей радости🥰')
+        if state == None:
+            await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
 
 
 
-@dp.message_handler(state=Letter_class.Letter.q_username)
+@dp.message_handler(state=Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
-    username = message.text
-    await state.update_data(answer1=username)
-    await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
-    await Letter_class.Letter.q_text_val.set()
+    user = types.User.get_current()
+    user_in_DB: User = await get_user(user.id)
+    if user_in_DB:
+        if not user_in_DB.is_bot_blocked:
+            username = message.text
+            if username.startwith("@"):
+                await state.update_data(answer1=username)
+                await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+                await Letter.q_text_val.set()
+            else:
+                pass
 
-@dp.message_handler(state=Letter_class.Letter.q_text_val)
+@dp.message_handler(state=Letter.q_text_val)
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
     username = data.get('answer1')
@@ -38,18 +77,41 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
+    keyboard = await is_correct_keyboard(123)
     await message.answer(text_val, reply_markup=keyboard)
     await state.finish()
 
-@dp.callback_query_handler(lambda c: c.data == 'good')
-async def process_callback_button1(callback_query: types.CallbackQuery):
+
+async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
+    letter = await get_letter(id)
     await bot.send_message(callback_query.from_user.id, 'Мы всё записали) Хорошего дня!')
 
 
 
-@dp.callback_query_handler(lambda c: c.data == 'bad')
-async def process_callback_button1(callback_query: types.CallbackQuery):
+
+async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь нам @юзернейм твоей радости🥰')
-    await Letter_class.Letter.q_username.set()
+    await Letter.q_username.set()
+
+
+
+@dp.callback_query_handler(menu_cd.filter(), state="*")
+async def navigate(call: types.CallbackQuery, callback_data: dict):
+    current_level = callback_data.get('level')
+    id = callback_data.get('id')
+
+
+    levels = {
+        "1": process_callback_button1,
+        "2": process_callback_button2,
+
+
+    }
+
+    current_level_function = levels[current_level]
+
+    await current_level_function(
+        call, id=id
+    )
