@@ -1,9 +1,7 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-
-
-
 from aiogram import types
+from aiogram.utils.callback_data import CallbackData
+
 menu_cd = CallbackData("show_menu", "level", "id") #"1:2"  #"good:2"
 def make_callback_data(level, id=0):
     return menu_cd.new(level=level, id=id)
