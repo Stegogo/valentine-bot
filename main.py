@@ -1,4 +1,3 @@
-import postgres
 from aiogram import Bot, Dispatcher, executor, types
 import data
 
@@ -8,6 +7,9 @@ tg_token = data.token
 bot = Bot(token=tg_token)
 dp = Dispatcher(bot)
 
+import postgres
+async def on_startup():
+    await postgres.main()
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
@@ -24,6 +26,6 @@ async def send_welcome(message: types.Message):
 
 
 if __name__ == '__main__':
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, on_startup=)
 
 
