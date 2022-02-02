@@ -9,7 +9,8 @@ from aiogram.dispatcher.filters import Command
 
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
-    users = await postgres.main()
+
+    users = await postgres.get_users(1)
 
     if message.from_user.id in users:
         #Кидаем здесь нужный стейт
@@ -17,7 +18,7 @@ async def send_welcome(message: types.Message):
     else:
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         print("Вас нет в базе данных")
-        await postgres.create(message.from_user.id)
+        await postgres.create_user(message.from_user.id) #
         await message.answer('Отправь нам @юзернейм твоей радости🥰')
         await Letter_class.Letter.q_username.set()
 
