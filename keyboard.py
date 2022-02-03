@@ -11,3 +11,5 @@ buttons = [
     types.InlineKeyboardButton(text='Нет, ошибся', callback_data='bad')
 ]
 keyboard.add(*buttons)
+
+

@@ -13,9 +13,8 @@ async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
 
     if message.from_user.id in users:
-        #Срабатывает если пользователь в базе данных
-        #Кидаем здесь нужный стейт
-        pass
+        await message.answer('Отправь нам @юзернейм твоей радости🥰')
+        await Letter_class.Letter.q_username.set()
     else:
         #Срабатывает, если пользователя нет в дб и добавляет его туда
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
@@ -28,9 +27,12 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(state=Letter_class.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
     username = message.text
-    await state.update_data(answer1=username)
-    await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
-    await Letter_class.Letter.q_text_val.set()
+    if username.startswith('@'):
+        await state.update_data(answer1=username)
+        await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+        await Letter_class.Letter.q_text_val.set()
+    else:
+        await message.answer('Введи коректный юзернейм. Начни с @')
 
 @dp.message_handler(state=Letter_class.Letter.q_text_val)
 async def text_val_answer(message: types.Message, state: FSMContext):

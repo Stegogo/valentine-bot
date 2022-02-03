@@ -1,11 +1,12 @@
 from aiogram import Bot, Dispatcher, executor
 import data
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 tg_token = data.token
 
-# Initialize bot and dispatcher
+storage = MemoryStorage()
 bot = Bot(token=tg_token)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=storage)
 
 import postgres
 async def on_startup(dispatcher):
