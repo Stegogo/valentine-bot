@@ -6,7 +6,7 @@ import Letter_class
 
 >>>>>>> Stashed changes
 from main import bot, dp
-from keyboard import  is_correct_keyboard
+from keyboard import is_correct_keyboard, menu_cd
 from aiogram import types
 import postgres
 
