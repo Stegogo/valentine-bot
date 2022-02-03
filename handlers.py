@@ -1,5 +1,10 @@
 from aiogram.dispatcher import FSMContext
+<<<<<<< Updated upstream
 from states import Letter
+=======
+import Letter_class
+
+>>>>>>> Stashed changes
 from main import bot, dp
 from keyboard import  is_correct_keyboard
 from aiogram import types
@@ -82,36 +87,63 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+<<<<<<< Updated upstream
 async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs):
+=======
+async def process_callback_button1(callback_query: types.CallbackQuery, id, data_1):
+>>>>>>> Stashed changes
     await bot.answer_callback_query(callback_query.id)
     letter = await get_letter(id)
     await bot.send_message(callback_query.from_user.id, 'Мы всё записали) Хорошего дня!')
+    letter = Letter()
+    letter.sender_message_id = 
+    
 
 
-
+<<<<<<< Updated upstream
 
 async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь нам @юзернейм твоей радости🥰')
     await Letter.q_username.set()
 
+=======
+@dp.callback_query_handler(lambda c: c.data == 'bad')
+async def process_callback_button2(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, 'Отправь нам @юзернейм твоей радости🥰')
+    await Letter_class.Letter.q_username.set()
+>>>>>>> Stashed changes
 
 
 @dp.callback_query_handler(menu_cd.filter(), state="*")
 async def navigate(call: types.CallbackQuery, callback_data: dict):
     current_level = callback_data.get('level')
     id = callback_data.get('id')
+<<<<<<< Updated upstream
 
 
     levels = {
         "1": process_callback_button1,
         "2": process_callback_button2,
 
+=======
+    data_1 = callback_data.get('data_1')
+    
+
+    levels = {
+        "1": process_callback_button1,
+        
+>>>>>>> Stashed changes
 
     }
 
     current_level_function = levels[current_level]
 
     await current_level_function(
+<<<<<<< Updated upstream
         call, id=id
+=======
+        call, id=id, i=i, id2=id2
+>>>>>>> Stashed changes
     )
