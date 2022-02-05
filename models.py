@@ -22,6 +22,8 @@ class Letter(db.Model):
     __tablename__ = "letters"
 
     id = db.Column(db.Integer, db.Sequence("letters_id_seq"), primary_key=True)
+    photo = db.Column(db.String)
+    video = db.Column(db.String)
     sender_id = db.Column(db.Integer)
     recipient_id = db.Column(db.Integer)
     status = db.Column(db.String)
