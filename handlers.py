@@ -11,20 +11,25 @@ import models
 from aiogram.dispatcher.filters import Command
 
 
+
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
 
-    if message.from_user.id in users:
-        await message.answer('Отправь нам @юзернейм твоей радости🥰')
-        await states.Letter.q_username.set()
-    else:
+    if not message.from_user.id in users:
         # Срабатывает, если пользователя нет в дб и добавляет его туда
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         await postgres.create_user(message.from_user.id)  #
-        await message.answer('Отправь нам @юзернейм твоей радости🥰')
-        await states.Letter.q_username.set()
 
+    await message.answer('Отправь нам @юзернейм твоей радости🥰')
+    await states.Letter.q_username.set()
+
+
+@dp.message_handler(state=states.Letter.startpoint)
+async def startpoint_handler(message: types.Message):
+    await message.answer('Отправь нам @юзернейм твоей радости🥰')
+    await states.Letter.q_username.set()
 
 @dp.message_handler(state=states.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
@@ -62,6 +67,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['photo'])
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -85,6 +92,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
         pass
     await message.answer('Ваше фото (можете добавить к нему текст)', reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video'])
 async def text_val_answer(message: types.Message, state: FSMContext):
@@ -105,6 +114,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await bot.send_video(message.from_user.id, letter.video)
     await message.answer('Ваше видео', reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['animation'])
 async def text_val_answer(message: types.Message, state: FSMContext):
 
@@ -123,6 +134,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await bot.send_animation(message.from_user.id, letter.gif)
     await message.answer('Ваша гифка', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['sticker'])
 async def text_val_answer(message: types.Message, state: FSMContext):
@@ -143,6 +156,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await bot.send_sticker(message.from_user.id, letter.sticker)
     await message.answer('Ваш стикер', reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['voice'])
 async def text_val_answer(message: types.Message, state: FSMContext):
 
@@ -161,6 +176,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await bot.send_voice(message.from_user.id, letter.voice)
     await message.answer('Ваше голосовое сообщение', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['audio'])
 async def text_val_answer(message: types.Message, state: FSMContext):
@@ -181,6 +198,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await bot.send_audio(message.from_user.id, letter.audio)
     await message.answer('Ваша песня', reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video_note'])
 async def text_val_answer(message: types.Message, state: FSMContext):
 
@@ -199,6 +218,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await bot.send_video_note(message.from_user.id, letter.video_note)
     await message.answer('Ваша песня', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
 
 @dp.message_handler(state=states.Letter.correct_username)
 async def text_val_answer1(message: types.Message, state: FSMContext):
@@ -222,6 +243,8 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
 
 
 @dp.message_handler(state=states.Letter.correct_val)
@@ -249,6 +272,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
+    await states.Letter.endpoint.set()
+
 
 async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
@@ -262,12 +287,12 @@ async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs
     await states.Letter.correct_val.set()
 
 
-@dp.message_handler(state=states.Letter.send_to_moder)
+
 async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
 
 
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(callback_query.from_user.id, 'Отправили!')
+    await bot.send_message(callback_query.from_user.id, 'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
     letter = await postgres.get_letter(int(id))
     await bot.send_message(moder_chat_id, 'Юзернейм')
     await bot.send_message(moder_chat_id, letter.recipient_username)
@@ -294,7 +319,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     elif letter.video_note:
         await bot.send_video_note(moder_chat_id, letter.video_note)
 
-
+    await states.Letter.startpoint.set()
 
 
 
