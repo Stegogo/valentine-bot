@@ -20,11 +20,6 @@ async def get_users(a=10):
 
     return users
 
-async def is_in_users(tg_id):
-    users = get_users(1)
-    print(users)
-
-
 
 async def get_user(id):
     user = await User.query.where(User.id == id).gino.first()
