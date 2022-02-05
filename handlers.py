@@ -1,7 +1,8 @@
 from aiogram.dispatcher import FSMContext
 import states
+from data import moder_chat_id
 from main import bot, dp
-from keyboard import keyboard, menu_cd
+from keyboard import  menu_cd, is_correct_keyboard
 from aiogram import types
 import postgres
 
@@ -26,7 +27,7 @@ async def send_welcome(message: types.Message):
 @dp.message_handler(state=states.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
     username = message.text
-    if username.startswith('@'):
+    if username.startswith('@') or username.startswith('+'):
         await state.update_data(answer1=username)
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
@@ -52,6 +53,15 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
+
+
+    letter = models.Letter()
+    #letter.recipient_username = username
+    #letter.text = text_val
+    #letter = await letter.create()
+    letter.update(recipient_username=username, text=text_val)
+
+    keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
 @dp.message_handler(state=states.Letter.correct_val)
