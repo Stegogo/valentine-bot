@@ -54,11 +54,27 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     await message.answer('Текст валентинки: ')
     await message.answer(text_val, reply_markup=keyboard)
 
+@dp.message_handler(state=states.Letter.correct_val)
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.text
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    await message.answer('Текст валентинки: ')
+    await message.answer(text_val, reply_markup=keyboard)
+
 
 async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь исправленный юзернейм')
     await states.Letter.correct_username.set()
+
+async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, 'Отправь новую валентинку')
+    await states.Letter.correct_val.set()
 
 
 async def process_callback_button3(callback_query: types.CallbackQuery, **kwargs):
@@ -82,6 +98,7 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
 
     levels = {
         '1': process_callback_button1,
+        '2': process_callback_button2,
         '3': process_callback_button3
     }
 

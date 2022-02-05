@@ -6,4 +6,5 @@ class Letter(StatesGroup):
     q_text_val = State()
     send_to_moder = State()
     correct_username = State()
+    correct_val = State()
 
