@@ -17,3 +17,24 @@ class User(db.Model):
     language = db.Column(db.String(200))
     is_admin = db.Column(db.Boolean)
 
+
+class Letter(db.Model):
+    __tablename__ = "letters"
+
+    id = db.Column(db.Integer, db.Sequence("letters_id_seq"), primary_key=True)
+    sender_id = db.Column(db.Integer)
+    recipient_id = db.Column(db.Integer)
+    status = db.Column(db.String)
+    text = db.Column(db.String)
+    recipient_username = db.Column(db.String)
+    recipient_phone_number = db.Column(db.String)
+    type = db.Column(db.String)
+    file_id_bot = db.Column(db.String)
+    file_id_userbot = db.Column(db.String)
+    sender_message_id = db.Column(db.Integer)
+    recipient_message_id = db.Column(db.Integer)
+    link_preview = db.Column(db.Boolean)
+    recipient_fullname = db.Column(db.String)
+    reject_reason = db.Column(db.String)
+    admin_message_id = db.Column(db.Integer)
+

@@ -6,6 +6,7 @@ async def startup():
     await db.gino.create_all()
 
 
+
 async def get_users(a=10):
     #users = await User.query.gino.all()
     users = []

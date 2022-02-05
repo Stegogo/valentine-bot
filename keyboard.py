@@ -17,4 +17,14 @@ def make_callback_data(level, id=0):
 # ]
 # keyboard.add(*buttons)
 
+#keyboard
+async def is_correct_keyboard(letter):
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    buttons = [
+        types.InlineKeyboardButton(text='Изменить юзернейм', callback_data=make_callback_data(level=1, id=letter.id)),
+        types.InlineKeyboardButton(text='Изменить валентинку', callback_data=make_callback_data(level=2, id=letter.id)),
+        types.InlineKeyboardButton(text='Всё верно, отправить на проверку', callback_data=make_callback_data(level=3, id=letter.id))
+    ]
+    keyboard.add(*buttons)
+    return keyboard
 

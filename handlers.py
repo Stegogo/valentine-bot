@@ -5,6 +5,8 @@ from main import bot, dp
 from keyboard import  menu_cd, is_correct_keyboard
 from aiogram import types
 import postgres
+import models
+
 
 from aiogram.dispatcher.filters import Command
 
@@ -34,16 +36,25 @@ async def username_answer(message: types.Message, state: FSMContext):
     else:
         await message.answer('Введи коректный юзернейм. Начни с @')
 
+
+
 @dp.message_handler(state=states.Letter.q_text_val)
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.text
     await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.text = text_val
+    letter = await letter.create()
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
+    keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
+
+
 
 @dp.message_handler(state=states.Letter.correct_username)
 async def text_val_answer1(message: types.Message, state: FSMContext):
@@ -73,6 +84,11 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.text = text_val
+    letter = await letter.create()
+    keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
 
@@ -93,12 +109,15 @@ async def process_callback_button3(callback_query: types.CallbackQuery, **kwargs
 
 
 @dp.message_handler(state=states.Letter.send_to_moder)
-async def moder_chat(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    await bot.send_message(-772205304, 'Юзернейм')
-    await bot.send_message(-772205304, data.get('answer1'))
-    await bot.send_message(-772205304, 'Текст валентинки')
-    await bot.send_message(-772205304, data.get('answer2'))
+async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, 'Отправили!')
+    print(id)
+    letter = await postgres.get_letter(int(id))
+    await bot.send_message(moder_chat_id, 'Юзернейм')
+    await bot.send_message(moder_chat_id, letter.recipient_username)
+    await bot.send_message(moder_chat_id, 'Текст валентинки')
+    await bot.send_message(moder_chat_id, letter.text)
 
 
 @dp.callback_query_handler(menu_cd.filter(), state='*')
