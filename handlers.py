@@ -78,7 +78,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     keyboard = await is_correct_keyboard(letter)
-    await bot.send_photo(message.from_user.id, letter.photo)
+    await message.answer_photo(letter.photo)
     try:
         await bot.send_message(message.from_user.id, letter.text)
     except aiogram.utils.exceptions.MessageTextIsEmpty:
@@ -262,7 +262,7 @@ async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs
     await states.Letter.correct_val.set()
 
 
-@dp.message_handler(state=states.Letter.send_to_moder)
+
 async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
 
 
