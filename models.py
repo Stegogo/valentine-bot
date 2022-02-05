@@ -26,6 +26,7 @@ class Letter(db.Model):
     recipient_id = db.Column(db.Integer)
     status = db.Column(db.String)
     text = db.Column(db.String)
+    photo = db.Column(db.String)
     recipient_username = db.Column(db.String)
     recipient_phone_number = db.Column(db.String)
     type = db.Column(db.String)
