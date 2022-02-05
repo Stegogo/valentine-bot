@@ -29,5 +29,10 @@ async def get_user(id):
 async def create_user(tg_id):
     user = await User.create(tg_id=tg_id)
 
+async def get_letter(id):
+    letter = await Letter.query.where(Letter.id == id).gino.first()
+    return letter
+
+
 
 

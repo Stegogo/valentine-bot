@@ -1,3 +1,4 @@
+import aiogram
 from aiogram.dispatcher import FSMContext
 import states
 from data import moder_chat_id
@@ -37,7 +38,7 @@ async def username_answer(message: types.Message, state: FSMContext):
         await message.answer('Введи коректный юзернейм. Начни с @')
 
 
-@dp.message_handler(state=states.Letter.q_text_val)
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['text'])
 async def text_val_answer(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
@@ -61,6 +62,143 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['photo'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.photo[-1].file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.photo = text_val
+    letter.text = message.caption
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_photo(message.from_user.id, letter.photo)
+    try:
+        await bot.send_message(message.from_user.id, letter.text)
+    except aiogram.utils.exceptions.MessageTextIsEmpty:
+        pass
+    await message.answer('Ваше фото (можете добавить к нему текст)', reply_markup=keyboard)
+
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['video'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.video.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.video = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_video(message.from_user.id, letter.video)
+    await message.answer('Ваше видео', reply_markup=keyboard)
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['animation'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.animation.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.gif = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_animation(message.from_user.id, letter.gif)
+    await message.answer('Ваша гифка', reply_markup=keyboard)
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['sticker'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.sticker.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.sticker = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_sticker(message.from_user.id, letter.sticker)
+    await message.answer('Ваш стикер', reply_markup=keyboard)
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['voice'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.voice.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.voice = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_voice(message.from_user.id, letter.voice)
+    await message.answer('Ваше голосовое сообщение', reply_markup=keyboard)
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['audio'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.audio.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.audio = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_audio(message.from_user.id, letter.audio)
+    await message.answer('Ваша песня', reply_markup=keyboard)
+
+@dp.message_handler(state=states.Letter.q_text_val, content_types=['video_note'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.video_note.file_id
+    await state.update_data(answer2=text_val)
+    letter = models.Letter()
+    letter.recipient_username = username
+    letter.video_note = text_val
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await bot.send_video_note(message.from_user.id, letter.video_note)
+    await message.answer('Ваша песня', reply_markup=keyboard)
 
 @dp.message_handler(state=states.Letter.correct_username)
 async def text_val_answer1(message: types.Message, state: FSMContext):
@@ -134,7 +272,30 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     await bot.send_message(moder_chat_id, 'Юзернейм')
     await bot.send_message(moder_chat_id, letter.recipient_username)
     await bot.send_message(moder_chat_id, 'Текст валентинки')
-    await bot.send_message(moder_chat_id, letter.text)
+    if letter.text or letter.photo:
+        try:
+            await bot.send_photo(moder_chat_id, letter.photo)
+        except aiogram.utils.exceptions.BadRequest:
+            pass
+        try:
+            await bot.send_message(moder_chat_id, letter.text)
+        except aiogram.utils.exceptions.MessageTextIsEmpty:
+            pass
+    elif letter.video:
+        await bot.send_video(moder_chat_id, letter.video)
+    elif letter.gif:
+        await bot.send_animation(moder_chat_id, letter.gif)
+    elif letter.sticker:
+        await bot.send_sticker(moder_chat_id, letter.sticker)
+    elif letter.voice:
+        await bot.send_voice(moder_chat_id, letter.voice)
+    elif letter.audio:
+        await bot.send_audio(moder_chat_id, letter.audio)
+    elif letter.video_note:
+        await bot.send_video_note(moder_chat_id, letter.video_note)
+
+
+
 
 
 @dp.callback_query_handler(menu_cd.filter(), state='*')
