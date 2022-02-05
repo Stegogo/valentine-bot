@@ -9,8 +9,9 @@ from main import bot, dp
 from keyboard import is_correct_keyboard, menu_cd
 from aiogram import types
 import postgres
-
+from models import Letter
 from aiogram.dispatcher.filters import Command
+from keyboard import is_correct_keyboard
 
 @dp.my_chat_member_handler()
 async def chat_update(my_chat_member: types.ChatMemberUpdated):
@@ -48,7 +49,20 @@ async def send_welcome(message: types.Message):
         print("Вас нет в базе данных")
         await postgres.create(message.from_user.id)
         await message.answer('Отправь нам @юзернейм твоей радости🥰')
+<<<<<<< Updated upstream
         await Letter.q_username.set()
+=======
+        await states.Letter.q_username.set()
+        
+
+@dp.message_handler(state=states.Letter.q_username)
+async def username_answer(message: types.Message, state: FSMContext):
+    username = message.text
+    if username.startswith('@'):
+        await state.update_data(answer1=username)
+        await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+        await states.Letter.q_text_val.set()
+>>>>>>> Stashed changes
     else:
         # Кидаем здесь нужный стейт
         print("Вы есть в базе данных")
@@ -79,10 +93,24 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.text
+<<<<<<< Updated upstream
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
     keyboard = await is_correct_keyboard(123)
+=======
+    letter = Letter()
+    letter.recipient_username = username
+    letter.text = text_val
+
+    letter = await letter.create()
+
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    await message.answer('Текст валентинки: ')
+    keyboard = await keyboards.is_correct_markup(letter)
+>>>>>>> Stashed changes
     await message.answer(text_val, reply_markup=keyboard)
     await state.finish()
 
@@ -99,13 +127,33 @@ async def process_callback_button1(callback_query: types.CallbackQuery, id, data
     letter.sender_message_id = 
     
 
+<<<<<<< Updated upstream
+=======
+async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
+    
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, 'Отправь новую валентинку')
+    await states.Letter.correct_val.set()
+>>>>>>> Stashed changes
 
 <<<<<<< Updated upstream
 
+<<<<<<< Updated upstream
 async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь нам @юзернейм твоей радости🥰')
     await Letter.q_username.set()
+=======
+
+async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
+    await bot.answer_callback_query(callback_query.id)
+    await bot.send_message(callback_query.from_user.id, 'Отправили!')
+    letter = await get_letter(int(id))
+    await bot.send_message(-772205304, 'Юзернейм')
+    await bot.send_message(-772205304, letter.recipient_username)
+    await bot.send_message(-772205304, 'Текст валентинки')
+    await bot.send_message(-772205304, letter.text)
+>>>>>>> Stashed changes
 
 =======
 @dp.callback_query_handler(lambda c: c.data == 'bad')

@@ -7,6 +7,7 @@ def make_callback_data(level, id=0):
     return menu_cd.new(level=level, id=id)
 
 
+<<<<<<< Updated upstream
 async def is_correct_keyboard(letter_id):
     letter = await get_letter(letter_id)
 
@@ -32,6 +33,17 @@ buttons = [
     types.InlineKeyboardButton(text='Нет, ошибся', callback_data='bad')
 ]
 keyboard.add(*buttons)
+=======
+async def is_correct_keyboard(letter):
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    buttons = [
+        types.InlineKeyboardButton(text='Изменить юзернейм', callback_data=make_callback_data(level=1, id=letter.id)),
+        types.InlineKeyboardButton(text='Изменить валентинку', callback_data=make_callback_data(level=2, id=letter.id)),
+        types.InlineKeyboardButton(text='Всё верно, отправить на проверку', callback_data=make_callback_data(level=3, id=models.User.id))
+    ]
+    keyboard.add(*buttons)
+    return keyboard
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
 

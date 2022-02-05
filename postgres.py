@@ -52,3 +52,6 @@ async def get_user(id):
     return user
 
 
+async def get_letter(id):
+    letter = await Letter.query.where(Letter.id == id).gino.first()
+    return letter

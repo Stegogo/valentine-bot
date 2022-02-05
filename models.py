@@ -17,7 +17,10 @@ class User(db.Model):
     language = db.Column(db.String(200))
     is_admin = db.Column(db.Boolean)
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 class Letter(db.Model):
     __tablename__ = "letters"
     query: sql.Select
@@ -37,4 +40,8 @@ class Letter(db.Model):
     link_preview = Column(db.Boolean)
     recipient_fullname = Column(db.String)
     reject_reason = Column(db.String)
+<<<<<<< Updated upstream
     admin_message_id = Column(db.Integer)
+=======
+    admin_message_id = Column(db.Integer)
+>>>>>>> Stashed changes
