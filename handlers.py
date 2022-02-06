@@ -85,7 +85,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     keyboard = await is_correct_keyboard(letter)
-    await bot.send_photo(message.from_user.id, letter.photo)
+    await message.answer_photo(letter.photo)
     try:
         await bot.send_message(message.from_user.id, letter.text)
     except aiogram.utils.exceptions.MessageTextIsEmpty:
