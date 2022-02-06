@@ -55,6 +55,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     letter.recipient_username = username
     letter.text = text_val
+    letter.type = 'TEXT'
     letter.sender_id = message.from_user.id
 
     letter = await letter.create()
@@ -297,6 +298,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
     letter = await postgres.get_letter(int(id))
+    await callback_query.message.delete_reply_markup()
     await bot.send_message(moder_chat_id, 'Юзернейм')
     await bot.send_message(moder_chat_id, letter.recipient_username)
     await bot.send_message(moder_chat_id, 'Текст валентинки')
@@ -314,6 +316,8 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
         await bot.send_video_note(chat_id=moder_chat_id, video_note=letter.file_id)
     elif letter.type == 'AUDIO':
         await bot.send_audio(chat_id=moder_chat_id, audio=letter.file_id)
+    elif letter.type == 'TEXT':
+        await bot.send_message(chat_id=moder_chat_id, text=letter.text)
 
 
 
