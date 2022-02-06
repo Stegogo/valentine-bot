@@ -11,8 +11,6 @@ import models
 from aiogram.dispatcher.filters import Command
 
 
-
-
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
@@ -31,9 +29,9 @@ async def startpoint_handler(message: types.Message):
     await message.answer('Отправь нам @юзернейм твоей радости🥰')
     await states.Letter.q_username.set()
 
+
 @dp.message_handler(state=states.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
-
     username = message.text
     if username.startswith('@') or username.startswith('+'):
         await state.update_data(answer1=username)
@@ -45,7 +43,6 @@ async def username_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['text'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.text
@@ -69,6 +66,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer(text_val, reply_markup=keyboard)
 
     await states.Letter.endpoint.set()
+
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['photo'])
 async def text_val_answer(message: types.Message, state: FSMContext):
@@ -115,9 +113,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['animation'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.animation.file_id
@@ -137,9 +135,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['sticker'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.sticker.file_id
@@ -159,9 +157,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['voice'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.voice.file_id
@@ -181,9 +179,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['audio'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.audio.file_id
@@ -203,9 +201,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video_note'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.video_note.file_id
@@ -225,57 +223,163 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.correct_username)
 async def text_val_answer1(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = message.text
+    await state.update_data(answer1=username)
     text_val = data.get('answer2')
     letter_id = data.get("letter_id")
-
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
-
     letter = await models.Letter.get(letter_id)
-
     letter.recipient_username = username
     letter.text = text_val
     letter.sender_id = message.from_user.id
-
     await letter.update(recipient_username=username).apply()
-
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
-
     await states.Letter.endpoint.set()
 
-
-@dp.message_handler(state=states.Letter.correct_val)
+'''Блок хендлеров для измененения валентинки'''
+@dp.message_handler(state=states.Letter.correct_val, content_types=['text'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.text
     letter_id = data.get("letter_id")
-
     await state.update_data(answer2=text_val)
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
-
     letter = await models.Letter.get(letter_id)
-
     letter.recipient_username = username
-    letter.text = text_val
     letter.sender_id = message.from_user.id
-
-    await letter.update(text=text_val).apply()
-
-
+    await letter.update(text=text_val, type='TEXT').apply()
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
+    await states.Letter.endpoint.set()
 
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['photo'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.photo[-1].file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(text=message.caption, file_id=text_val, type='PHOTO').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_photo(photo=letter.file_id, caption=letter.text)
+    await message.answer('Ваше фото', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['video'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.video.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(text=message.caption, file_id=text_val, type='VIDEO').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_video(video=letter.file_id, caption=letter.text)
+    await message.answer('Ваше видео', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['animation'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.animation.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(file_id=text_val, type='GIF').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_animation(animation=letter.file_id)
+    await message.answer('Ваша гифка', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['voice'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.voice.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(file_id=text_val, type='VOICE').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_voice(voice=letter.file_id)
+    await message.answer('Ваше голосовое', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['sticker'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.sticker.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(file_id=text_val, type='STICKER').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_sticker(sticker=letter.file_id)
+    await message.answer('Ваш стикер', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['video_note'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.video_note.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(file_id=text_val, type='VIDEO_NOTE').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_video_note(video_note=letter.file_id)
+    await message.answer('Ваше видеосообщение', reply_markup=keyboard)
+    await states.Letter.endpoint.set()
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['audio'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    username = data.get('answer1')
+    text_val = message.audio.file_id
+    letter_id = data.get("letter_id")
+    await state.update_data(answer2=text_val)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    letter = await models.Letter.get(letter_id)
+    letter.recipient_username = username
+    await letter.update(file_id=text_val, type='AUDIO').apply()
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_audio(audio=letter.file_id)
+    await message.answer('Ваша пэсня', reply_markup=keyboard)
     await states.Letter.endpoint.set()
 
 
@@ -283,25 +387,21 @@ async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь исправленный юзернейм')
     await states.Letter.correct_username.set()
-
+    await callback_query.message.delete_reply_markup()
 
 async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь новую валентинку')
     await states.Letter.correct_val.set()
-
-
+    await callback_query.message.delete_reply_markup()
 
 async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
-
-
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(callback_query.from_user.id, 'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
+    await bot.send_message(callback_query.from_user.id,
+                           'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
     letter = await postgres.get_letter(int(id))
     await callback_query.message.delete_reply_markup()
-    await bot.send_message(moder_chat_id, 'Юзернейм')
-    await bot.send_message(moder_chat_id, letter.recipient_username)
-    await bot.send_message(moder_chat_id, 'Текст валентинки')
+    await bot.send_message(moder_chat_id, f'Юзернейм: \n{letter.recipient_username}\nВалентинка: ')
     if letter.type == "PHOTO":
         await bot.send_photo(chat_id=moder_chat_id, photo=letter.file_id, caption=letter.text)
     elif letter.type == 'VIDEO':
@@ -319,10 +419,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     elif letter.type == 'TEXT':
         await bot.send_message(chat_id=moder_chat_id, text=letter.text)
 
-
-
     await states.Letter.startpoint.set()
-
 
 
 @dp.callback_query_handler(menu_cd.filter(), state='*')
