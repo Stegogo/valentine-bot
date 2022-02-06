@@ -269,7 +269,7 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
     username = data.get('answer1')
-    text_val = message.text
+    text_val = message.html_text
     letter_id = data.get("letter_id")
     await state.update_data(answer2=text_val)
     await message.answer('Я всё правильно понял?')
@@ -280,7 +280,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     letter.sender_id = message.from_user.id
     await letter.update(text=text_val, type='TEXT').apply()
     keyboard = await is_correct_keyboard(letter)
-    await message.answer(text_val, reply_markup=keyboard)
+    await message.answer(text_val, reply_markup=keyboard, parse_mode='HTML')
     await states.Letter.endpoint.set()
 
 
