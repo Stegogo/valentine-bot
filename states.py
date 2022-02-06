@@ -6,4 +6,6 @@ class Letter(StatesGroup):
     q_text_val = State()
     correct_username = State()
     correct_val = State()
+    startpoint = State()
+    endpoint = State()
 

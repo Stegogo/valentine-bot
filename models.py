@@ -22,13 +22,7 @@ class Letter(db.Model):
     __tablename__ = "letters"
 
     id = db.Column(db.Integer, db.Sequence("letters_id_seq"), primary_key=True)
-    photo = db.Column(db.String)
-    video = db.Column(db.String)
-    gif = db.Column(db.String)
-    sticker = db.Column(db.String)
-    voice = db.Column(db.String)
-    audio = db.Column(db.String)
-    video_note = db.Column(db.String)
+    file_id = db.Column(db.String)
     sender_id = db.Column(db.Integer)
     recipient_id = db.Column(db.Integer)
     status = db.Column(db.String)
