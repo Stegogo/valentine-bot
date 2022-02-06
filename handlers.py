@@ -27,24 +27,27 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(state=states.Letter.startpoint)
 async def startpoint_handler(message: types.Message):
-    await message.answer('Отправь нам @юзернейм твоей радости🥰')
+    await message.answer(
+        'Отправь нам @юзернейм или телефон твоей радости🥰. Можешь также переслать ее сообщение, если ее профиль открыт.')
     await states.Letter.q_username.set()
 
 @dp.message_handler(state=states.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
 
     username = message.text
-    if message.from_user:
-        await state.update_data(answer1=str(message.from_user.id))
+    if message.forward_from:
+        await state.update_data(answer1=str(message.forward_from.id))
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
+        username = str(message.from_user.id)
 
     elif username.startswith('@') or username.startswith('+'):
         await state.update_data(answer1=username)
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
     else:
-        await message.answer('Введи коректный юзернейм. Начни с @')
+        await message.answer('Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
+                             'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
 
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['text'])
@@ -236,11 +239,19 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     text_val = data.get('answer2')
     letter_id = data.get("letter_id")
 
-    if message.from_user:
+    if message.forward_from:
         #await state.update_data(answer1=str(message.from_user.id))
         username = str(message.forward_from.id)
-    else:
+    elif message.text.startswith('@') or message.text.startswith('+'):
         username = message.text
+        await state.update_data(answer1=username)
+        await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+        await states.Letter.q_text_val.set()
+    else:
+        await message.answer(
+            'Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
+            'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
+
 
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
