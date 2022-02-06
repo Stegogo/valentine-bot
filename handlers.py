@@ -12,7 +12,6 @@ from aiogram.dispatcher.filters import Command
 
 
 
-
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
@@ -22,7 +21,7 @@ async def send_welcome(message: types.Message):
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         await postgres.create_user(message.from_user.id)  #
 
-    await message.answer('Отправь нам @юзернейм твоей радости🥰')
+    await message.answer('Отправь нам @юзернейм или телефон твоей радости🥰. Можешь также переслать ее сообщение, если ее профиль открыт.')
     await states.Letter.q_username.set()
 
 
@@ -35,7 +34,12 @@ async def startpoint_handler(message: types.Message):
 async def username_answer(message: types.Message, state: FSMContext):
 
     username = message.text
-    if username.startswith('@') or username.startswith('+'):
+    if message.from_user:
+        await state.update_data(answer1=str(message.from_user.id))
+        await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+        await states.Letter.q_text_val.set()
+
+    elif username.startswith('@') or username.startswith('+'):
         await state.update_data(answer1=username)
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
@@ -229,9 +233,14 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 async def text_val_answer1(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
-    username = message.text
     text_val = data.get('answer2')
     letter_id = data.get("letter_id")
+
+    if message.from_user:
+        #await state.update_data(answer1=str(message.from_user.id))
+        username = str(message.forward_from.id)
+    else:
+        username = message.text
 
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
