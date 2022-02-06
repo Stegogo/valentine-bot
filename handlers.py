@@ -408,13 +408,13 @@ async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь исправленный юзернейм')
     await states.Letter.correct_username.set()
-
+    await callback_query.message.delete_reply_markup()
 
 async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs):
     await bot.answer_callback_query(callback_query.id)
     await bot.send_message(callback_query.from_user.id, 'Отправь новую валентинку')
     await states.Letter.correct_val.set()
-
+    await callback_query.message.delete_reply_markup()
 
 
 async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
@@ -424,9 +424,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     await bot.send_message(callback_query.from_user.id, 'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
     letter = await postgres.get_letter(int(id))
     await callback_query.message.delete_reply_markup()
-    await bot.send_message(moder_chat_id, 'Юзернейм')
-    await bot.send_message(moder_chat_id, letter.recipient_username)
-    await bot.send_message(moder_chat_id, 'Текст валентинки')
+    await bot.send_message(moder_chat_id, f'Юзернейм: \n{letter.recipient_username}\nВалентинка: ')
     if letter.type == "PHOTO":
         await bot.send_photo(chat_id=moder_chat_id, photo=letter.file_id, caption=letter.text)
     elif letter.type == 'VIDEO':
