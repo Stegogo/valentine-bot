@@ -61,7 +61,6 @@ async def username_answer(message: types.Message, state: FSMContext):
 async def text_val_answer(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
-    recipient_id = data.get('answer1')
     text_val = message.text
     await state.update_data(answer2=text_val)
 
