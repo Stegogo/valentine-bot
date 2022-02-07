@@ -88,6 +88,8 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     else:
         print("problem")
 
+    print(username)
+
     letter.type = 'TEXT'
     letter.text = text_val
     letter.sender_id = message.from_user.id
@@ -347,7 +349,12 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     letter = await postgres.get_letter(int(id))
     await callback_query.message.delete_reply_markup()
     await bot.send_message(moder_chat_id, 'Юзернейм')
-    await bot.send_message(moder_chat_id, letter.recipient_username)
+    if letter.recipient_username:
+        await bot.send_message(moder_chat_id, letter.recipient_username)
+    elif letter.recipient_phone_number:
+        await bot.send_message(moder_chat_id, letter.recipient_phone_number)
+    else:
+        await bot.send_message(moder_chat_id, letter.recipient_id)
     await bot.send_message(moder_chat_id, 'Текст валентинки')
     if letter.type == "PHOTO":
         await bot.send_photo(chat_id=moder_chat_id, photo=letter.file_id, caption=letter.text)
