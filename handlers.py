@@ -35,14 +35,23 @@ async def startpoint_handler(message: types.Message):
 async def username_answer(message: types.Message, state: FSMContext):
 
     username = message.text
+
+
     if message.forward_from:
-        await state.update_data(answer1=str(message.forward_from.id))
+        if message.forward_from.username:
+            await state.update_data(recipient_username=str(message.forward_from.username), recipient_id=int(message.forward_from.id))
+            await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+            await states.Letter.q_text_val.set()
+        else:
+            await state.update_data(recipient_id=int(message.forward_from.id))
+            await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
+            await states.Letter.q_text_val.set()
+    elif username.startswith('@'):
+        await state.update_data(recipient_username=username)
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
-        username = str(message.from_user.id)
-
-    elif username.startswith('@') or username.startswith('+'):
-        await state.update_data(answer1=username)
+    elif username.startswith('+'):
+        await state.update_data(recipient_phone_number=username)
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
     else:
@@ -54,15 +63,35 @@ async def username_answer(message: types.Message, state: FSMContext):
 async def text_val_answer(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
-    username = data.get('answer1')
+    recipient_id = data.get('answer1')
     text_val = message.text
     await state.update_data(answer2=text_val)
 
+    #try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
 
-    letter.recipient_username = username
-    letter.text = text_val
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.type = 'TEXT'
+    letter.text = text_val
     letter.sender_id = message.from_user.id
 
     letter = await letter.create()
