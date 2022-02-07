@@ -268,9 +268,17 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     text_val = data.get('answer2')
     letter_id = data.get("letter_id")
 
-    if message.forward_from:
-        #await state.update_data(answer1=str(message.from_user.id))
+    letter = await models.Letter.get(letter_id)
+
+    if message.forward_from.username:
         username = str(message.forward_from.id)
+        letter.recipient_username = username
+
+        letter.recipient_id = str(message.forward_from.id)
+    elif message.forward_from:
+        #await state.update_data(answer1=str(message.from_user.id))
+        letter.recipient_id = str(message.forward_from.id)
+
     elif message.text.startswith('@') or message.text.startswith('+'):
         username = message.text
         await state.update_data(answer1=username)
@@ -286,9 +294,7 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
 
-    letter = await models.Letter.get(letter_id)
 
-    letter.recipient_username = username
     letter.text = text_val
     letter.sender_id = message.from_user.id
 
