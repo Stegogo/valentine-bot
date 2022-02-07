@@ -1,4 +1,3 @@
-import aiogram
 from aiogram.dispatcher import FSMContext
 import states
 from data import moder_chat_id
@@ -8,7 +7,6 @@ from aiogram import types
 import postgres
 import models
 
-from aiogram.dispatcher.filters import Command
 
 
 
