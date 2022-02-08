@@ -8,8 +8,6 @@ import postgres
 import models
 
 
-
-
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
@@ -19,7 +17,8 @@ async def send_welcome(message: types.Message):
         await message.answer("Привет! Я бот, который отправляет поздравления другим людям!")
         await postgres.create_user(message.from_user.id)  #
 
-    await message.answer('Отправь нам @юзернейм или телефон твоей радости🥰. Можешь также переслать ее сообщение, если ее профиль открыт.')
+    await message.answer(
+        'Отправь нам @юзернейм или телефон твоей радости🥰. Можешь также переслать ее сообщение, если ее профиль открыт.')
     await states.Letter.q_username.set()
 
 
@@ -29,15 +28,15 @@ async def startpoint_handler(message: types.Message):
         'Отправь нам @юзернейм или телефон твоей радости🥰. Можешь также переслать ее сообщение, если ее профиль открыт.')
     await states.Letter.q_username.set()
 
+
 @dp.message_handler(state=states.Letter.q_username)
 async def username_answer(message: types.Message, state: FSMContext):
-
     username = message.text
-
 
     if message.forward_from:
         if message.forward_from.username:
-            await state.update_data(recipient_username=str(message.forward_from.username), recipient_id=int(message.forward_from.id))
+            await state.update_data(recipient_username=str(message.forward_from.username),
+                                    recipient_id=int(message.forward_from.id))
             await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
             await states.Letter.q_text_val.set()
         else:
@@ -53,18 +52,18 @@ async def username_answer(message: types.Message, state: FSMContext):
         await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
         await states.Letter.q_text_val.set()
     else:
-        await message.answer('Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
-                             'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
+        await message.answer(
+            'Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
+            'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
 
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['text'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     text_val = message.text
     await state.update_data(answer2=text_val)
 
-    #try
+    # try
     recipient_username = data.get('recipient_username')
     recipient_id = data.get('recipient_id')
     recipient_phone_number = data.get('recipient_phone_number')
@@ -87,8 +86,6 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     else:
         print("problem")
 
-    print(username)
-
     letter.type = 'TEXT'
     letter.text = text_val
     letter.sender_id = message.from_user.id
@@ -104,6 +101,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer(text_val, reply_markup=keyboard)
 
     await states.Letter.endpoint.set()
+
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['photo'])
 async def text_val_answer(message: types.Message, state: FSMContext):
@@ -150,9 +148,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['animation'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.animation.file_id
@@ -172,9 +170,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['sticker'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.sticker.file_id
@@ -194,9 +192,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['voice'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.voice.file_id
@@ -216,9 +214,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['audio'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.audio.file_id
@@ -238,9 +236,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video_note'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.video_note.file_id
@@ -260,9 +258,9 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     await states.Letter.endpoint.set()
 
+
 @dp.message_handler(state=states.Letter.correct_username)
 async def text_val_answer1(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     text_val = data.get('answer2')
     letter_id = data.get("letter_id")
@@ -275,7 +273,7 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
         letter.recipient_id = str(message.forward_from.id)
     elif message.forward_from:
-        #await state.update_data(answer1=str(message.from_user.id))
+        # await state.update_data(answer1=str(message.from_user.id))
         letter.recipient_id = str(message.forward_from.id)
 
     elif message.text.startswith('@') or message.text.startswith('+'):
@@ -288,11 +286,9 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
             'Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
             'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
 
-
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
-
 
     letter.text = text_val
     letter.sender_id = message.from_user.id
@@ -307,7 +303,6 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.correct_val)
 async def text_val_answer(message: types.Message, state: FSMContext):
-
     data = await state.get_data()
     username = data.get('answer1')
     text_val = message.text
@@ -325,7 +320,6 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     letter.sender_id = message.from_user.id
 
     await letter.update(text=text_val).apply()
-
 
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
@@ -345,12 +339,10 @@ async def process_callback_button2(callback_query: types.CallbackQuery, **kwargs
     await states.Letter.correct_val.set()
 
 
-
 async def process_callback_button3(callback_query: types.CallbackQuery, id, **kwargs):
-
-
     await bot.answer_callback_query(callback_query.id)
-    await bot.send_message(callback_query.from_user.id, 'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
+    await bot.send_message(callback_query.from_user.id,
+                           'Отправили! Чтобы прислать мне ещё одну валентинку пришли мне любое сообщение либо нажми на /new)')
     letter = await postgres.get_letter(int(id))
     await callback_query.message.delete_reply_markup()
     await bot.send_message(moder_chat_id, 'Юзернейм')
@@ -378,10 +370,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     elif letter.type == 'TEXT':
         await bot.send_message(chat_id=moder_chat_id, text=letter.text)
 
-
-
     await states.Letter.startpoint.set()
-
 
 
 @dp.callback_query_handler(menu_cd.filter(), state='*')
