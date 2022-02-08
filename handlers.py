@@ -105,12 +105,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['photo'])
 async def text_val_answer(message: types.Message, state: FSMContext):
+
     data = await state.get_data()
-    username = data.get('answer1')
     text_val = message.photo[-1].file_id
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
+
     letter.file_id = text_val
     letter.type = "PHOTO"
     letter.text = message.caption
@@ -129,11 +152,32 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video'])
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    username = data.get('answer1')
-    text_val = message.video.file_id
+    text_val = message.text
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.text = message.caption
     letter.type = 'VIDEO'
@@ -267,20 +311,31 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
     letter = await models.Letter.get(letter_id)
 
-    if message.forward_from.username:
-        username = str(message.forward_from.id)
-        letter.recipient_username = username
+    username = message.text
 
-        letter.recipient_id = str(message.forward_from.id)
-    elif message.forward_from:
-        # await state.update_data(answer1=str(message.from_user.id))
-        letter.recipient_id = str(message.forward_from.id)
+    if message.forward_from:
+        if message.forward_from.username:
+            await state.update_data(recipient_username=str(message.forward_from.username),
+                                    recipient_id=int(message.forward_from.id))
+            await message.answer('Супер! Мы нашли его!')
+            await states.Letter.q_text_val.set()
+        else:
+            await state.update_data(recipient_id=int(message.forward_from.id))
+            await message.answer('Супер!')
+            await states.Letter.q_text_val.set()
 
-    elif message.text.startswith('@') or message.text.startswith('+'):
-        username = message.text
-        await state.update_data(answer1=username)
-        await message.answer('Супер! Мы нашли его! Теперь мы ждём текст твоей валентинки🧐')
-        await states.Letter.q_text_val.set()
+        await states.Letter.endpoint.set()
+
+    elif username.startswith('@'):
+        await state.update_data(recipient_username=username)
+        await message.answer('Супер! Мы нашли его!')
+        await states.Letter.endpoint.set()
+
+    elif username.startswith('+'):
+        await state.update_data(recipient_phone_number=username)
+        await message.answer('Супер! Мы нашли его!')
+        await states.Letter.endpoint.set()
+
     else:
         await message.answer(
             'Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
@@ -298,7 +353,6 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
-    await states.Letter.endpoint.set()
 
 
 @dp.message_handler(state=states.Letter.correct_val)
