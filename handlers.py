@@ -47,7 +47,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
     username = data.get('answer1')
-    text_val = message.text
+    text_val = message.html_text
     await state.update_data(answer2=text_val)
 
     letter = models.Letter()
@@ -65,7 +65,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
     keyboard = await is_correct_keyboard(letter)
-    await message.answer(text_val, reply_markup=keyboard)
+    await message.answer(text_val, reply_markup=keyboard, parse_mode="HTML")
 
     await states.Letter.endpoint.set()
 
@@ -280,7 +280,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     letter.sender_id = message.from_user.id
     await letter.update(text=text_val, type='TEXT').apply()
     keyboard = await is_correct_keyboard(letter)
-    await message.answer(text_val, reply_markup=keyboard, parse_mode='HTML')
+    await message.answer(text_val, reply_markup=keyboard, parse_mode="HTML")
     await states.Letter.endpoint.set()
 
 
@@ -426,9 +426,9 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     await callback_query.message.delete_reply_markup()
     await bot.send_message(moder_chat_id, f'Юзернейм: \n{letter.recipient_username}\nВалентинка: ')
     if letter.type == "PHOTO":
-        await bot.send_photo(chat_id=moder_chat_id, photo=letter.file_id, caption=letter.text)
+        await bot.send_photo(chat_id=moder_chat_id, photo=letter.file_id, caption=letter.text, parse_mode="HTML")
     elif letter.type == 'VIDEO':
-        await bot.send_video(chat_id=moder_chat_id, video=letter.file_id, caption=letter.text)
+        await bot.send_video(chat_id=moder_chat_id, video=letter.file_id, caption=letter.text, parse_mode="HTML")
     elif letter.type == 'GIF':
         await bot.send_animation(chat_id=moder_chat_id, animation=letter.file_id)
     elif letter.type == 'STICKER':
@@ -440,7 +440,7 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
     elif letter.type == 'AUDIO':
         await bot.send_audio(chat_id=moder_chat_id, audio=letter.file_id)
     elif letter.type == 'TEXT':
-        await bot.send_message(chat_id=moder_chat_id, text=letter.text)
+        await bot.send_message(chat_id=moder_chat_id, text=letter.text, parse_mode="HTML")
 
 
 
