@@ -26,6 +26,10 @@ async def get_user(id):
     user = await User.query.where(User.id == id).gino.first()
     return user
 
+async def get_user_by_tg_id(tg_id):
+    user = await User.query.where(User.tg_id == tg_id).gino.first()
+    return user
+
 async def create_user(tg_id):
     user = await User.create(tg_id=tg_id)
 

@@ -1135,10 +1135,12 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
 
 @dp.message_handler(lambda msg: msg.from_user.id == data.userbot_id)
 async def userbot_connect(message: types.Message):
+
     user = types.User.get_current()
-    user = await postgres.get_user(user.id)
-    users = await postgres.get_users(0)
-    if user in users:
+    user = await postgres.get_user_by_tg_id(user.id)
+
+    users = await postgres.get_users(1)
+    if user.tg_id in users:
         print("in users")
         if not user.is_bot_blocked:
             print("not blocked")
