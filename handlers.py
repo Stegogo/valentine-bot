@@ -151,8 +151,10 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video'])
 async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.video.file_id
+
     data = await state.get_data()
-    text_val = message.text
     await state.update_data(answer2=text_val)
 
     # try
