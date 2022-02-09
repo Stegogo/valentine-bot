@@ -8,4 +8,5 @@ class Letter(StatesGroup):
     correct_val = State()
     startpoint = State()
     endpoint = State()
+    add_receiver_contact = State()
 

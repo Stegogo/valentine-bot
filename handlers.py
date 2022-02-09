@@ -1,10 +1,12 @@
 import aiogram
 from aiogram.dispatcher import FSMContext
+
+import data
 import states
 from data import moder_chat_id
 from main import bot, dp
-from keyboard import menu_cd, is_correct_keyboard
-from aiogram import types
+from keyboard import menu_cd, is_correct_keyboard, check_markup, reject_keyboard
+from aiogram import types, Dispatcher
 import postgres
 import models
 
@@ -1035,10 +1037,69 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
         await bot.send_audio(chat_id=moder_chat_id, audio=letter.file_id)
     elif letter.type == 'TEXT':
         await bot.send_message(chat_id=moder_chat_id, text=letter.text, parse_mode="HTML")
+    keyboard = await check_markup(letter)
+    await bot.send_message(chat_id=moder_chat_id, text="Что сделать?", reply_markup=keyboard)
 
     await states.Letter.startpoint.set()
 
 
+async def add_contact(call: types.CallbackQuery, id, **kwargs):
+    user = types.User.get_current()
+    user_in_DB: models.User = await postgres.get_user(user.id)
+    await call.message.edit_text("Пришли айди или юзернейм получателя")
+    await states.Letter.add_receiver_contact.set()
+    state = Dispatcher.get_current().current_state()
+    await state.update_data(letter_id=id)
+    # if user_in_DB:
+    # if not user_in_DB.is_bot_blocked:
+    # if user_in_DB.is_admin:
+
+
+@dp.message_handler(state=states.Letter.add_receiver_contact)
+async def get_username_from_admin(message: types.Message, state: FSMContext):
+    print("ok")
+    data = await state.get_data()
+    letter: models.Letter = data.get("letter_id")
+    # letter.recipient_username
+    # letter.recipient_id
+    keyboard = await check_markup(letter)
+    await message.answer(text="Что сделать?", reply_markup=keyboard)
+
+
+async def initialisate_chat_with_user(call: types.CallbackQuery, id, **kwargs):
+    user = types.User.get_current()
+    user_in_DB: models.User = await postgres.get_user(user.id)
+    if user.id == data.userbot_id:
+
+        await call.message.edit_text("Пришли айди или юзернейм получателя")
+        await states.Letter.add_receiver_contact.set()
+        state = Dispatcher.get_current().current_state()
+        await state.update_data(letter_id=id)
+    else:
+        await bot.answer_callback_query(callback_query_id=call.id, text="Эту кнопку должен нажать акк юзербота",
+                                        show_alert=True)
+
+
+async def reject_letter(call: types.CallbackQuery, id, **kwargs):
+    user = types.User.get_current()
+    user_in_DB: models.User = await postgres.get_user(user.id)
+
+    letter = await postgres.get_letter(int(id))
+    keyboard = await reject_keyboard(letter=letter)
+    await call.message.edit_text("Напиши причину отказа", reply_markup=keyboard)
+    '''
+    await states.Letter.add_receiver_contact.set()
+    state = Dispatcher.get_current().current_state()
+    await state.update_data(letter_id=id)
+    '''
+
+
+async def admin_menu(call: types.CallbackQuery, id, **kwargs):
+    user = types.User.get_current()
+    user_in_DB: models.User = await postgres.get_user(user.id)
+    letter = await postgres.get_letter(int(id))
+    keyboard = await check_markup(letter)
+    await call.message.edit_text(text="Что сделать?", reply_markup=keyboard)
 
 
 @dp.callback_query_handler(menu_cd.filter(), state='*')
@@ -1049,7 +1110,11 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
     levels = {
         '1': process_callback_button1,
         '2': process_callback_button2,
-        '3': process_callback_button3
+        '3': process_callback_button3,
+        '4': add_contact,
+        '5': initialisate_chat_with_user,
+        '6': reject_letter,
+        '7': admin_menu,
     }
 
     current_level_function = levels[current_level]
@@ -1057,3 +1122,68 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
     await current_level_function(
         call, id=id
     )
+
+
+@dp.message_handler(lambda msg: msg.from_user.id == USERBOT)
+async def userbot_connect(message: types.Message):
+    user = types.User.get_current()
+    user_in_DB: User = await get_user(user.id)
+    if user_in_DB:
+        if not user_in_DB.is_bot_blocked:
+            if user_in_DB.is_admin:
+                if message.text.startswith("/#"):
+                    message_dict = message.text[2:].split(":")
+                    if message_dict[0] == "s":
+                        # succesfull delivery
+                        letter: Letter = await get_letter(int(message_dict[1]))
+
+                        letter.status = "DELIVERED"
+                        await letter.update(status="DELIVERED").apply()
+
+                        await bot.send_message(chat_id=letter.sender_id,
+                                               text=f"Твоя валентинка успешно доставлена получателю",
+                                               reply_to_message_id=letter.sender_message_id)
+                        alert_mess_text = f"🟢🟢🟢\nНовая валентинка\n\nПолучатель: "
+                        if letter.recipient_id != None:
+
+                            alert_mess_text += f'<a href="tg://user?id={str(letter.recipient_id)}">{str(letter.recipient_fullname)}</a>'
+                        elif letter.recipient_username != None:
+                            alert_mess_text += f"@{letter.recipient_username}"
+                        elif letter.recipient_phone_number != None:
+                            alert_mess_text += f"<code>{letter.recipient_phone_number}</code>\nСодержание:"
+                        await bot.edit_message_text(chat_id=ADMINS, message_id=int(letter.admin_message_id),
+                                                    text=alert_mess_text)
+                    elif message_dict[0] == "e":
+                        # error delivery
+                        letter: Letter = await get_letter(int(message_dict[1]))
+
+                        letter.status = "ERROR"
+                        await letter.update(status="ERROR").apply()
+
+                        await bot.send_message(chat_id=letter.sender_id,
+                                               text=f"К сожалению во время отправки твоей валентинки возникла ошибки, попробуй еще раз",
+                                               reply_to_message_id=letter.sender_message_id)
+                        alert_mess_text = f"❌❌❌\nНовая валентинка\n\nПолучатель: "
+                        if letter.recipient_id != None:
+
+                            alert_mess_text += f'<a href="tg://user?id={str(letter.recipient_id)}">{str(letter.recipient_fullname)}</a>'
+                        elif letter.recipient_username != None:
+                            alert_mess_text += f"@{letter.recipient_username}"
+                        elif letter.recipient_phone_number != None:
+                            alert_mess_text += f"<code>{letter.recipient_phone_number}</code>\nСодержание:"
+                        await bot.edit_message_text(chat_id=ADMINS, message_id=int(letter.admin_message_id),
+                                                    text=alert_mess_text)
+                    elif message_dict[0] == "a":
+                        answer: Answer = await get_answer(int(message_dict[1]))
+                        try:
+                            if answer.type != "TEXT" and message.reply_to_message != None:
+                                answer.file_id_bot = await get_file_id(answer, message.reply_to_message)
+                            mess_id = await send_answer(letter=answer, chat_id=answer.recipient_id)
+                            answer.status = "DELIVERED"
+                            answer.recipient_message_id = mess_id.message_id
+                            await answer.update(status="DELIVERED", file_id_bot=answer.file_id_bot,
+                                                recipient_message_id=answer.recipient_message_id).apply()
+                        except:
+
+                            answer.status = "ERROR"
+                            await answer.update(status="ERROR").apply()
