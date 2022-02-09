@@ -416,7 +416,7 @@ async def text_val_answer(message: types.Message, state: FSMContext):
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     keyboard = await is_correct_keyboard(letter)
     await message.answer_video_note(video_note=letter.file_id)
-    await message.answer('Ваша песня', reply_markup=keyboard)
+    await message.answer('Ваше видеосообщение', reply_markup=keyboard)
 
     await states.Letter.endpoint.set()
 
@@ -429,21 +429,7 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
     letter = await models.Letter.get(letter_id)
 
-    recipient_username = data.get('recipient_username')
-    recipient_id = data.get('recipient_id')
-    recipient_phone_number = data.get('recipient_phone_number')
 
-
-    if recipient_username and recipient_id:
-        username = recipient_username
-    elif recipient_id:
-        username = recipient_id
-    elif recipient_username:
-        username = recipient_username
-    elif recipient_phone_number:
-        username = recipient_phone_number
-    else:
-        print("problem")
 
     if message.forward_from:
         if message.forward_from.username:
@@ -451,22 +437,27 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
                                     recipient_id=int(message.forward_from.id))
             await message.answer('Супер! Мы нашли его!')
             await letter.update(recipient_username=str(message.forward_from.username)).apply()
+            username = message.forward_from.username
 
         else:
             await state.update_data(recipient_id=int(message.forward_from.id))
             await letter.update(recipient_id=int(message.forward_from.id)).apply()
             await message.answer('Супер!')
+            username = message.forward_from.id
 
 
         await states.Letter.endpoint.set()
 
     elif message.text.startswith('@'):
+        username = message.text
         await state.update_data(recipient_username=username)
         await letter.update(recipient_username=username).apply()
         await message.answer('Супер! Мы нашли его!')
         await states.Letter.endpoint.set()
 
+
     elif message.text.startswith('+'):
+        username = message.text
         await state.update_data(recipient_phone_number=username)
         await letter.update(recipient_phone_number=username).apply()
         await message.answer('Супер! Мы нашли его!')
@@ -485,7 +476,33 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
 
     keyboard = await is_correct_keyboard(letter)
-    await message.answer(text_val, reply_markup=keyboard)
+
+    if letter.type == "PHOTO":
+        await message.answer_photo(photo=letter.file_id, caption=letter.text, parse_mode="HTML")
+        await message.answer('Ваше фото', reply_markup=keyboard)
+    elif letter.type == 'VIDEO':
+        await message.answer_video(video=letter.file_id, caption=letter.text, parse_mode="HTML")
+        await message.answer('Ваше видео', reply_markup=keyboard)
+    elif letter.type == 'GIF':
+        await message.answer_animation(animation=letter.file_id)
+        await message.answer('Ваша гифка', reply_markup=keyboard)
+    elif letter.type == 'STICKER':
+        await message.answer_sticker(sticker=letter.file_id)
+        await message.answer('Ваш стикер', reply_markup=keyboard)
+    elif letter.type == 'VOICE':
+        await message.answer_voice(voice=letter.file_id)
+        await message.answer('Ваше голосовое', reply_markup=keyboard)
+    elif letter.type == 'VIDEO_NOTE':
+        await message.answer_video_note(video_note=letter.file_id)
+        await message.answer('Ваше видеосообщение', reply_markup=keyboard)
+    elif letter.type == 'AUDIO':
+        await message.answer_audio(audio=letter.file_id)
+        await message.answer('Ваша песня', reply_markup=keyboard)
+    elif letter.type == 'TEXT':
+        await message.answer(text=letter.text, parse_mode="HTML")
+        await message.answer('Ваш текст', reply_markup=keyboard)
+
+
 
 
 
