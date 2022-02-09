@@ -10,6 +10,10 @@ from aiogram import types, Dispatcher
 import postgres
 import models
 
+@dp.message_handler(commands=['test'])
+async def test(message):
+    pass
+
 @dp.message_handler(commands=['start'])
 async def send_welcome(message: types.Message):
     users = await postgres.get_users(1)
@@ -1082,16 +1086,20 @@ async def initialisate_chat_with_user(call: types.CallbackQuery, id, **kwargs):
 
 async def reject_letter(call: types.CallbackQuery, id, **kwargs):
     user = types.User.get_current()
-    user_in_DB: models.User = await postgres.get_user(user.id)
+    user_in_DB = await postgres.get_user(user.id)
 
     letter = await postgres.get_letter(int(id))
     keyboard = await reject_keyboard(letter=letter)
     await call.message.edit_text("Напиши причину отказа", reply_markup=keyboard)
-    '''
+
     await states.Letter.add_receiver_contact.set()
     state = Dispatcher.get_current().current_state()
     await state.update_data(letter_id=id)
-    '''
+
+async def approve_letter(call: types.CallbackQuery, id, **kwargs):
+    pass
+
+
 
 
 async def admin_menu(call: types.CallbackQuery, id, **kwargs):
@@ -1115,6 +1123,7 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
         '5': initialisate_chat_with_user,
         '6': reject_letter,
         '7': admin_menu,
+        '8': approve_letter
     }
 
     current_level_function = levels[current_level]
@@ -1124,18 +1133,22 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
     )
 
 
-@dp.message_handler(lambda msg: msg.from_user.id == USERBOT)
+@dp.message_handler(lambda msg: msg.from_user.id == data.userbot_id)
 async def userbot_connect(message: types.Message):
     user = types.User.get_current()
-    user_in_DB: User = await get_user(user.id)
-    if user_in_DB:
-        if not user_in_DB.is_bot_blocked:
-            if user_in_DB.is_admin:
+    user = await postgres.get_user(user.id)
+    users = await postgres.get_users(0)
+    if user in users:
+        print("in users")
+        if not user.is_bot_blocked:
+            print("not blocked")
+            if user.is_admin:
+                print("in admin")
                 if message.text.startswith("/#"):
                     message_dict = message.text[2:].split(":")
                     if message_dict[0] == "s":
                         # succesfull delivery
-                        letter: Letter = await get_letter(int(message_dict[1]))
+                        letter = await postgres.get_letter(int(message_dict[1]))
 
                         letter.status = "DELIVERED"
                         await letter.update(status="DELIVERED").apply()
@@ -1151,11 +1164,11 @@ async def userbot_connect(message: types.Message):
                             alert_mess_text += f"@{letter.recipient_username}"
                         elif letter.recipient_phone_number != None:
                             alert_mess_text += f"<code>{letter.recipient_phone_number}</code>\nСодержание:"
-                        await bot.edit_message_text(chat_id=ADMINS, message_id=int(letter.admin_message_id),
+                        await bot.edit_message_text(chat_id=moder_chat_id, message_id=int(letter.admin_message_id),
                                                     text=alert_mess_text)
                     elif message_dict[0] == "e":
                         # error delivery
-                        letter: Letter = await get_letter(int(message_dict[1]))
+                        letter = await postgres.get_letter(int(message_dict[1]))
 
                         letter.status = "ERROR"
                         await letter.update(status="ERROR").apply()
@@ -1171,14 +1184,14 @@ async def userbot_connect(message: types.Message):
                             alert_mess_text += f"@{letter.recipient_username}"
                         elif letter.recipient_phone_number != None:
                             alert_mess_text += f"<code>{letter.recipient_phone_number}</code>\nСодержание:"
-                        await bot.edit_message_text(chat_id=ADMINS, message_id=int(letter.admin_message_id),
+                        await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id),
                                                     text=alert_mess_text)
                     elif message_dict[0] == "a":
-                        answer: Answer = await get_answer(int(message_dict[1]))
+                        answer = await postgres.get_answer(int(message_dict[1]))
                         try:
                             if answer.type != "TEXT" and message.reply_to_message != None:
-                                answer.file_id_bot = await get_file_id(answer, message.reply_to_message)
-                            mess_id = await send_answer(letter=answer, chat_id=answer.recipient_id)
+                                answer.file_id_bot = await postgres.get_file_id(answer, message.reply_to_message)
+                            mess_id = await postgres.send_answer(letter=answer, chat_id=answer.recipient_id)
                             answer.status = "DELIVERED"
                             answer.recipient_message_id = mess_id.message_id
                             await answer.update(status="DELIVERED", file_id_bot=answer.file_id_bot,
