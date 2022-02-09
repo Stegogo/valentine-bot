@@ -1141,11 +1141,8 @@ async def userbot_connect(message: types.Message):
 
     users = await postgres.get_users(1)
     if user.tg_id in users:
-        print("in users")
         if not user.is_bot_blocked:
-            print("not blocked")
             if user.is_admin:
-                print("in admin")
                 if message.text.startswith("/#"):
                     message_dict = message.text[2:].split(":")
                     if message_dict[0] == "s":
