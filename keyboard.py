@@ -9,15 +9,12 @@ menu_cd = CallbackData("show_menu", "level", "id")
 def make_callback_data(level, id=0):
     return menu_cd.new(level=level, id=id)
 
-# keyboard = InlineKeyboardMarkup(row_width=1)
-# buttons = [
-#     types.InlineKeyboardButton(text='Изменить юзернейм', callback_data=make_callback_data(level=1, id=models.Letter.id)),
-#     types.InlineKeyboardButton(text='Изменить валентинку', callback_data=make_callback_data(level=2, id=models.Letter.id)),
-#     types.InlineKeyboardButton(text='Всё верно, отправить на проверку', callback_data=make_callback_data(level=3, id=models.Letter.id))
-# ]
-# keyboard.add(*buttons)
+async def reject_keyboard(letter):
+    keyboard = InlineKeyboardMarkup(row_width=1)
+    keyboard.row(InlineKeyboardButton(text='Не отклонять', callback_data=make_callback_data(level=7, id=letter.id)))
 
-#keyboard
+    return keyboard
+
 async def is_correct_keyboard(letter):
     keyboard = InlineKeyboardMarkup(row_width=1)
     buttons = [
