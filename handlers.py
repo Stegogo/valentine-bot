@@ -428,28 +428,46 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
     letter = await models.Letter.get(letter_id)
 
-    username = message.text
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+    elif recipient_id:
+        username = recipient_id
+    elif recipient_username:
+        username = recipient_username
+    elif recipient_phone_number:
+        username = recipient_phone_number
+    else:
+        print("problem")
 
     if message.forward_from:
         if message.forward_from.username:
             await state.update_data(recipient_username=str(message.forward_from.username),
                                     recipient_id=int(message.forward_from.id))
             await message.answer('Супер! Мы нашли его!')
-            await states.Letter.q_text_val.set()
+            await letter.update(recipient_username=str(message.forward_from.username)).apply()
+
         else:
             await state.update_data(recipient_id=int(message.forward_from.id))
+            await letter.update(recipient_id=int(message.forward_from.id)).apply()
             await message.answer('Супер!')
-            await states.Letter.q_text_val.set()
+
 
         await states.Letter.endpoint.set()
 
     elif username.startswith('@'):
         await state.update_data(recipient_username=username)
+        await letter.update(recipient_username=username).apply()
         await message.answer('Супер! Мы нашли его!')
         await states.Letter.endpoint.set()
 
     elif username.startswith('+'):
         await state.update_data(recipient_phone_number=username)
+        await letter.update(recipient_phone_number=username).apply()
         await message.answer('Супер! Мы нашли его!')
         await states.Letter.endpoint.set()
 
@@ -458,44 +476,503 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
             'Некорректный запрос. Если вы переслали сообщение, то профиль получателя закрыт, если юзернейм,'
             'то он должен начинаться с @. Если вы хотите написать номер, то он должен начинаться с +')
 
+
+
     await message.answer('Я всё правильно понял?')
     await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
     await message.answer('Текст валентинки: ')
 
-    letter.text = text_val
-    letter.sender_id = message.from_user.id
-
-    await letter.update(recipient_username=username).apply()
 
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
 
 
-@dp.message_handler(state=states.Letter.correct_val)
+@dp.message_handler(state=states.Letter.correct_val, content_types=['text'])
 async def text_val_answer(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    username = data.get('answer1')
     text_val = message.text
+    await state.update_data(answer2=text_val)
     letter_id = data.get("letter_id")
 
-    await state.update_data(answer2=text_val)
-    await message.answer('Я всё правильно понял?')
-    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
-    await message.answer('Текст валентинки: ')
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
 
     letter = await models.Letter.get(letter_id)
 
-    letter.recipient_username = username
-    letter.text = text_val
-    letter.sender_id = message.from_user.id
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
 
-    await letter.update(text=text_val).apply()
+    elif recipient_phone_number:
 
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='TEXT',
+        text=text_val,
+        sender_id=message.from_user.id
+    ).apply()
+
+
+
+    await state.update_data(letter_id=letter.id)
+
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    await message.answer('Текст валентинки: ')
     keyboard = await is_correct_keyboard(letter)
     await message.answer(text_val, reply_markup=keyboard)
 
     await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['photo'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    data = await state.get_data()
+    text_val = message.photo[-1].file_id
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='PHOTO',
+        text=message.caption,
+        file_id=text_val,
+        sender_id=message.from_user.id
+    ).apply()
+
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_photo(photo=letter.file_id, caption=letter.text)
+    await message.answer('Ваше фото', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['video'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.video.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='VIDEO',
+        text=message.caption,
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_video(video=letter.file_id, caption=letter.text)
+    await message.answer('Ваше видео', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['animation'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.animation.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='GIF',
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_animation(animation=letter.file_id)
+    await message.answer('Ваша гифка', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['sticker'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.sticker.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='STICKER',
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_sticker(sticker=letter.file_id)
+    await message.answer('Ваш стикер', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['voice'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.voice.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='VOICE',
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    letter.file_id = text_val
+    letter.type = "VOICE"
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_voice(voice=letter.file_id)
+    await message.answer('Ваше голосовое сообщение', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['audio'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.audio.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='AUDIO',
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    letter.file_id = text_val
+    letter.type = 'AUDIO'
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_audio(audio=letter.file_id)
+    await message.answer('Ваша песня', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
+
+@dp.message_handler(state=states.Letter.correct_val, content_types=['video_note'])
+async def text_val_answer(message: types.Message, state: FSMContext):
+
+    text_val = message.video_note.file_id
+
+    data = await state.get_data()
+    await state.update_data(answer2=text_val)
+    letter_id = data.get("letter_id")
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
+    letter = await models.Letter.get(letter_id)
+
+    if recipient_username and recipient_id:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username,
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_id:
+        username = recipient_id
+        await letter.update(
+            recipient_id=recipient_id
+        ).apply()
+    elif recipient_username:
+        username = recipient_username
+        await letter.update(
+            recipient_username=recipient_username
+        ).apply()
+
+    elif recipient_phone_number:
+
+        username = recipient_phone_number
+        await letter.update(
+            recipient_phone_number=recipient_phone_number
+        ).apply()
+    else:
+        print("problem")
+
+
+    await letter.update(
+        type='VIDEO_NOTE',
+        sender_id=message.from_user.id,
+        file_id=text_val
+    ).apply()
+
+    letter.file_id = text_val
+    letter.type = 'VIDEO_NOTE'
+    letter.sender_id = message.from_user.id
+    letter = await letter.create()
+    await state.update_data(letter_id=letter.id)
+    await message.answer('Я всё правильно понял?')
+    await message.answer(f'Твоя валентинка будет отправлена пользователю {username}')
+    keyboard = await is_correct_keyboard(letter)
+    await message.answer_video_note(video_note=letter.file_id)
+    await message.answer('Ваша песня', reply_markup=keyboard)
+
+    await states.Letter.endpoint.set()
+
 
 
 async def process_callback_button1(callback_query: types.CallbackQuery, **kwargs):
