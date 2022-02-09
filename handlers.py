@@ -459,13 +459,13 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
 
         await states.Letter.endpoint.set()
 
-    elif username.startswith('@'):
+    elif message.text.startswith('@'):
         await state.update_data(recipient_username=username)
         await letter.update(recipient_username=username).apply()
         await message.answer('Супер! Мы нашли его!')
         await states.Letter.endpoint.set()
 
-    elif username.startswith('+'):
+    elif message.text.startswith('+'):
         await state.update_data(recipient_phone_number=username)
         await letter.update(recipient_phone_number=username).apply()
         await message.answer('Супер! Мы нашли его!')
