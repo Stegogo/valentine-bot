@@ -197,12 +197,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['animation'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    username = data.get('answer1')
+
     text_val = message.animation.file_id
+
+    data = await state.get_data()
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.type = 'GIF'
     letter.sender_id = message.from_user.id
@@ -219,12 +242,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['sticker'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    username = data.get('answer1')
+
     text_val = message.sticker.file_id
+
+    data = await state.get_data()
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.type = 'STICKER'
     letter.sender_id = message.from_user.id
@@ -241,12 +287,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['voice'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    username = data.get('answer1')
+
     text_val = message.voice.file_id
+
+    data = await state.get_data()
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.type = "VOICE"
     letter.sender_id = message.from_user.id
@@ -263,12 +332,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['audio'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    username = data.get('answer1')
+
     text_val = message.audio.file_id
+
+    data = await state.get_data()
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.type = 'AUDIO'
     letter.sender_id = message.from_user.id
@@ -285,12 +377,35 @@ async def text_val_answer(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Letter.q_text_val, content_types=['video_note'])
 async def text_val_answer(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    username = data.get('answer1')
+
     text_val = message.video_note.file_id
+
+    data = await state.get_data()
     await state.update_data(answer2=text_val)
+
+    # try
+    recipient_username = data.get('recipient_username')
+    recipient_id = data.get('recipient_id')
+    recipient_phone_number = data.get('recipient_phone_number')
+
     letter = models.Letter()
-    letter.recipient_username = username
+
+    if recipient_username and recipient_id:
+        letter.recipient_username = recipient_username
+        letter.recipient_id = recipient_id
+        username = recipient_username
+    elif recipient_id:
+        letter.recipient_id = recipient_id
+        username = recipient_id
+    elif recipient_username:
+        letter.recipient_username = recipient_username
+        username = recipient_username
+    elif recipient_phone_number:
+        letter.recipient_phone_number = recipient_phone_number
+        username = recipient_phone_number
+    else:
+        print("problem")
+
     letter.file_id = text_val
     letter.type = 'VIDEO_NOTE'
     letter.sender_id = message.from_user.id
