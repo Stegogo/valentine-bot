@@ -9,4 +9,5 @@ class Letter(StatesGroup):
     startpoint = State()
     endpoint = State()
     add_receiver_contact = State()
-
+    add_photo_to_text = State()
+    reject_reason = State()

@@ -11,10 +11,13 @@ dp = Dispatcher(bot, storage=storage)
 import postgres
 async def on_startup(dispatcher):
     await postgres.startup()
+    await set_bot_commands()
+    print("Bot started")
 
 
 if __name__ == '__main__':
-    from handlers import dp
+    from handlers import dp, set_bot_commands
+
     executor.start_polling(dp, on_startup=on_startup)
 
 
