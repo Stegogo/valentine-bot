@@ -1,3 +1,5 @@
+from main import _
+
 hello_message = ("Привет! Я бот, который отправляет поздравления другим людям!")
 is_correct_question = _("Я всё правильно понял?")
 cancel = _("Отмена")

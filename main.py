@@ -25,7 +25,7 @@ async def on_startup(dispatcher):
     print("Bot started")
 
 
-from lang_middlware import setup_middleware
+from lang_middleware import setup_middleware
 i18n = setup_middleware(dp)
 _ = i18n.gettext
 
