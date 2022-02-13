@@ -7,7 +7,7 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, db.Sequence("user_id_seq"), primary_key=True)
-    tg_id = db.Column(db.Integer)
+    tg_id = db.Column(db.BigInteger)
     username = db.Column(db.String(200))
     firstname = db.Column(db.String(200))
     lastname = db.Column(db.String(200))
@@ -22,8 +22,8 @@ class Letter(db.Model):
     __tablename__ = "letters"
 
     id = db.Column(db.Integer, db.Sequence("letters_id_seq"), primary_key=True)
-    sender_id = db.Column(db.Integer)
-    recipient_id = db.Column(db.Integer)
+    sender_id = db.Column(db.BigInteger)
+    recipient_id = db.Column(db.BigInteger)
     status = db.Column(db.String)
     text = db.Column(db.String)
     recipient_username = db.Column(db.String)
@@ -43,8 +43,8 @@ class Answer(db.Model):
     __tablename__ = "answers"
 
     id = db.Column(db.Integer, db.Sequence("answers_id_seq"), primary_key=True)
-    sender_id = db.Column(db.Integer)
-    recipient_id = db.Column(db.Integer)
+    sender_id = db.Column(db.BigInteger)
+    recipient_id = db.Column(db.BigInteger)
     status = db.Column(db.String)
     text = db.Column(db.String)
     type = db.Column(db.String)

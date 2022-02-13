@@ -1,6 +1,10 @@
+import datetime
+
 from aiogram import Bot, Dispatcher, executor
 import data
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+import handlers
 
 tg_token = data.token
 
@@ -12,6 +16,12 @@ import postgres
 async def on_startup(dispatcher):
     await postgres.startup()
     await set_bot_commands()
+    now = datetime.datetime.now()
+    scheduler = AsyncIOScheduler(timezone="Europe/Kiev")
+
+    scheduler.add_job(handlers.dashboard, 'interval', minutes=1, next_run_time=now)
+    scheduler.add_job(handlers.scan_queue, 'interval', seconds=20, next_run_time=now)
+    scheduler.start()
     print("Bot started")
 
 

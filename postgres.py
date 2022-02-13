@@ -1,4 +1,5 @@
 from aiogram import types
+from sqlalchemy import and_
 
 from models import User, db, data, Letter, Answer
 
@@ -45,6 +46,9 @@ async def count_letters():
 
 async def count_delivered_letters():
     return (await db.select([db.func.count()]).where(Letter.status=="DELIVERED").gino.scalar())
+
+async def count_queue_letters():
+    return (await db.select([db.func.count()]).where(Letter.status=="INQUEUE").gino.scalar())
 
 async def count_checking_letters():
     return (await db.select([db.func.count()]).where(Letter.status=="CHECKING").gino.scalar())
@@ -102,13 +106,16 @@ async def get_letter(id):
     letter = await Letter.query.where(Letter.id == id).gino.first()
     return letter
 
+async def get_letter_in_queue():
+    letter = await Letter.query.where(Letter.status == "INQUEUE").gino.first()
+    return letter
+
 async def get_answer(id):
     answer = await Answer.query.where(Answer.id == id).gino.first()
     return answer
 
-async def get_answer_by_recipient_message_id(id):
-    print(id)
-    answer = await Answer.query.where(Answer.recipient_message_id == id).gino.first()
+async def get_answer_by_recipient_message_id(id, user_id):
+    answer = await Answer.query.where(and_(Answer.recipient_id == user_id, Answer.recipient_message_id == id)).gino.first()
     return answer
 
 async def get_file_id(answer, reply_to_message):

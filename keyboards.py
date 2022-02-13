@@ -42,14 +42,14 @@ async def is_correct_keyboard(letter, letter_preview_id):
 
     return keyboard
 
-async def check_markup(letter: models.Letter):
+async def check_markup(letter: models.Letter, is_userbot_can_write_to_user_by_id=False):
     markup = InlineKeyboardMarkup()
     if letter.recipient_id == None and letter.recipient_username == None and letter.recipient_phone_number:
             markup.row(InlineKeyboardButton(text="Добавить данные получателя", callback_data=make_callback_data(level=4, id=letter.id)))
     
 
     else:
-        if letter.recipient_username:
+        if letter.recipient_username or is_userbot_can_write_to_user_by_id:
             markup.row(InlineKeyboardButton(text="Принять", callback_data=make_callback_data(level=8, id=letter.id)))
         else:
             markup.row(InlineKeyboardButton(text="Я написал первое сообщение", callback_data=make_callback_data(level=5, id=letter.id)))
