@@ -1066,7 +1066,6 @@ async def dashboard():
          f"Валентинок в базе: {letters_size}\nВ очереди: {queue_letters}\nУспешно доставлено: {delivered_letters}\nНа проверке: {checking_letters}\nВ процессе создания: {creating_letters}\n" \
          f"Ошибка доставки: {error_letters}\nОтклонено: {rejected_letters}\nПроверено, но не доставлено: {approved_letters}\n\n" \
          f"Ответов в базе: {answers_size}\nУспешно доставлено: {delivered_answers}\nОшибка доставки: {error_answers}\nДоставляется: {sending_answers}"
-
     try:
         await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=data.dashboard_message_id, text=text)
     except AttributeError as e:

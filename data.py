@@ -6,3 +6,7 @@ moder_chat_id = -1001749130800
 userbot_id = 838524205
 
 
+
+dashboard_message_id = 1447
+dashboard_message_id = 1452
+dashboard_message_id = 1457

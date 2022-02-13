@@ -19,8 +19,8 @@ async def on_startup(dispatcher):
     now = datetime.datetime.now()
     scheduler = AsyncIOScheduler(timezone="Europe/Kiev")
 
-    scheduler.add_job(handlers.dashboard, 'interval', minutes=1, next_run_time=now)
-    scheduler.add_job(handlers.scan_queue, 'interval', seconds=20, next_run_time=now)
+    scheduler.add_job(handlers.dashboard, 'interval', minutes=1)
+    scheduler.add_job(handlers.scan_queue, 'interval', seconds=20)
     scheduler.start()
     print("Bot started")
 
