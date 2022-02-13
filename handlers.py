@@ -84,7 +84,7 @@ async def send_welcome(message: types.Message):
     if not await default_check(types.User.get_current()):
         await message.answer_sticker(sticker="CAACAgQAAxkBAAIGXV__bWFhszPnWYSQJvKthQoMiem8AAJrAAPOOQgNWWbqY3aSS9AeBA")
         # Срабатывает, если пользователя нет в дб и добавляет его туда
-        await message.answer(translates.hello_message)
+        await message.answer(_(translates.hello_message))
         await postgres.create_user(message.from_user.id)  #
 
 
@@ -102,7 +102,7 @@ async def send_welcome(message: types.Message):
             state = Dispatcher.get_current().current_state()
             await state.update_data(letter=letter)
         else:
-            await message.answer(translates.incorrect_link)
+            await message.answer(_(translates.incorrect_link))
     else:
         await message.answer(
             translates.ask_for_username)

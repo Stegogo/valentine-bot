@@ -25,6 +25,10 @@ async def on_startup(dispatcher):
     print("Bot started")
 
 
+from lang_middlware import setup_middleware
+i18n = setup_middleware(dp)
+_ = i18n.gettext
+
 if __name__ == '__main__':
     from handlers import dp, set_bot_commands
 
