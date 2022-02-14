@@ -993,6 +993,11 @@ async def admin_menu(call: types.CallbackQuery, id, **kwargs):
             letter = await postgres.get_letter(int(id))
             keyboard = await check_markup(letter)
             await call.message.edit_text(text="Что сделать?", reply_markup=keyboard)
+            try:
+                state = Dispatcher.get_current().current_state()
+                await state.reset_state()
+            except:
+                pass
         except RetryAfter as e:
             print(e)
             await call.answer(text="Флуд Бан, нажми через несколько секунд")

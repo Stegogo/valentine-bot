@@ -19,6 +19,8 @@ async def on_startup(dispatcher):
     await postgres.startup()
     await set_bot_commands()
     settings = await postgres.get_settings()
+    settings.userbot_id = data.userbot_id
+    await settings.update(userbot_id = data.userbot_id).apply()
     now = datetime.datetime.now()
     scheduler = AsyncIOScheduler(timezone="Europe/Kiev")
 

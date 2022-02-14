@@ -40,6 +40,7 @@ async def get_settings():
         settings.instagram_bio_preview = data.instagram_bio_preview
         settings.is_send_to_moders = True
         settings.dashboard_message_id = data.dashboard_message_id
+        settings.userbot_id = data.dashboard_message_id
         await settings.create()
     return settings
 

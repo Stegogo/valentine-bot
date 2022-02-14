@@ -63,3 +63,4 @@ class Settings(db.Model):
     dashboard_message_id = db.Column(db.BigInteger)
     instagram_bio_preview = db.Column(db.String)
     is_send_to_moders = db.Column(db.Boolean)
+    userbot_id = db.Column(db.BigInteger)
