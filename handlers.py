@@ -976,7 +976,7 @@ async def change_moder_chat_id(mess: types.Message):
                                       reply=mess.message_id)
 
             else:
-                await mess.answer("Формат команды <code>/del_admin id_or_username</code>", reply=mess.message_id,
+                await mess.answer("Формат команды <code>/change_moder_chat_id chat_id</code>", reply=mess.message_id,
                                   parse_mode="HTML")
         except RetryAfter as e:
             print(e)
