@@ -667,7 +667,7 @@ async def scan_queue():
     if settings.is_send_to_moders:
         letter = await postgres.get_letter_in_queue()
         if letter:
-            if checking_letters < 3:
+            if checking_letters < 2:
                 letter.status = "CHECKING"
                 moder_chat_id = (await postgres.get_settings()).moder_chat_id
                 admin_mess_1 = await bot.send_message(chat_id=moder_chat_id, text=await get_admin_message_text(letter),
