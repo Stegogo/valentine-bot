@@ -498,7 +498,7 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
     if await default_check(types.User.get_current()):
         username = message.text
         data = await state.get_data()
-        letter = data.get('letter')
+        letter : models.Letter = data.get('letter')
         recipient_id=None
         recipient_username = None
         recipient_phone_number=None
@@ -519,7 +519,8 @@ async def text_val_answer1(message: types.Message, state: FSMContext):
         letter.recipient_id=recipient_id
         letter.recipient_username = recipient_username
         letter.recipient_phone_number = recipient_phone_number
-        await letter.update(recipient_id=recipient_id, recipient_username = recipient_username, recipient_phone_number = recipient_phone_number).apply()
+        letter.by_link = False
+        await letter.update(recipient_id=recipient_id, recipient_username = recipient_username, recipient_phone_number = recipient_phone_number, by_link = False).apply()
         await message.answer(await get_message_to_answer(letter), parse_mode="HTML")
 
         letter_preview = await send_letter(letter, chat_id=message.chat.id)
