@@ -12,12 +12,13 @@ class ACLMiddleware(I18nMiddleware):
     async def get_user_locale(self, action: str, args: Tuple[Any]):
         user = types.User.get_current()
         db_locale = await postgres.get_user_language(user.id)
-        print(db_locale)
 
-        if types.User.get_current().language_code in ['ru', 'uk']:
-            tg_locale =  types.User.get_current().language_code
+
+        if user.language_code in ['ru', 'uk']:
+            tg_locale =  user.language_code
         else:
             tg_locale =  'uk'
+        print(tg_locale)
         return db_locale or tg_locale
 
 def setup_middleware(dp):

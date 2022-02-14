@@ -30,3 +30,18 @@ add_admin_command = _("Додати адміна")
 del_admin_command = _("Видалити адміна")
 reply_to_answer = _("Щоб відповісти, зроби реплай самого повідомлення, а не цього.")
 new_letter = _("Вау, ти отримав валентинку через бот @FbmeValentineTestBot!❤️\n Можеш відповісти на нього, зробивши реплай.")
+button_change_recipient = _('Изменить получателя')
+button_change_content = _('Изменить валентинку')
+button_del_photo = _("Убрать фото")
+button_add_photo = _('Добавить фото')
+button_disable_preview = _('Выключить предпросмотр')
+button_enable_preview = _('Включить предпросмотр')
+button_send_to_admins = _('Всё верно, отправить на проверку')
+
+
+
+
+
+
+
+
