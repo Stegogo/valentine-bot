@@ -96,7 +96,7 @@ async def send_welcome(message: types.Message):
             letter.recipient_id = inviter.tg_id
             letter.recipient_fullname = inviter.fullname
             letter.recipient_username = inviter.username
-
+            letter.by_link = True
             await message.answer(translates.send_me_valentine_from_link.format(recipient_fullname=letter.recipient_fullname))
             await states.Letter.q_text_val.set()
             state = Dispatcher.get_current().current_state()

@@ -37,7 +37,7 @@ class Letter(db.Model):
     recipient_fullname = db.Column(db.String)
     reject_reason = db.Column(db.String)
     admin_message_id = db.Column(db.Integer)
-
+    by_link = db.Column(db.Boolean)
 
 class Answer(db.Model):
     __tablename__ = "answers"
