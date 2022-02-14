@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-14 03:25+0200\n"
+"POT-Creation-Date: 2022-02-14 03:41+0200\n"
 "PO-Revision-Date: 2022-02-14 02:19+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -235,7 +235,7 @@ msgstr ""
 " Ответь на него, сделав реплай!"
 
 #: translates.py:33
-msgid "Змінити отримучвача"
+msgid "Змінити отримувача"
 msgstr "Изменить получателя"
 
 #: translates.py:34
@@ -266,6 +266,10 @@ msgstr "Всё верно, отправить на проверку"
 #: translates.py:40
 msgid "Закрити"
 msgstr "Закрыть"
+
+#: translates.py:41
+msgid "Поточна мова - Українська"
+msgstr "Текущий язык - Русский"
 
 #~ msgid "Изменить получателя"
 #~ msgstr ""

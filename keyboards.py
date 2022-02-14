@@ -21,6 +21,20 @@ async def add_contact_keyboard(letter):
 
     return keyboard
 
+async def language_keyboard(user_id, current_locale):
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    if current_locale == 0:
+        keyboard.row(InlineKeyboardButton(text='🇺🇦Українська✅', callback_data=make_callback_data(level=13, id=user_id, extra_data=0)),
+                     InlineKeyboardButton(text='🇷🇺Русский', callback_data=make_callback_data(level=13, id=user_id, extra_data=1)))
+    else:
+        keyboard.row(InlineKeyboardButton(text='🇺🇦Українська', callback_data=make_callback_data(level=13, id=user_id,
+                                                                                                  extra_data=0)),
+                     InlineKeyboardButton(text='🇷🇺Русский✅', callback_data=make_callback_data(level=13, id=user_id,
+                                                                                               extra_data=1)))
+    keyboard.row(InlineKeyboardButton(text=translates.close, callback_data=make_callback_data(level=14)))
+
+    return keyboard
+
 async def is_correct_keyboard(letter, letter_preview_id):
     keyboard = InlineKeyboardMarkup(row_width=1)
     keyboard.row(types.InlineKeyboardButton(text=translates.button_change_recipient, callback_data=make_callback_data(level=1, id=letter.id)))

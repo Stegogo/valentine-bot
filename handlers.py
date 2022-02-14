@@ -118,12 +118,49 @@ async def new_letter(message: types.Message):
 
 @dp.message_handler(commands=["my_link"], state='*')
 async def my_link(mess: types.Message):
-    bot_username = (await bot.get_me()).username
-    user = types.User.get_current()
-    tg_id = user.id
-    link = f"https://t.me/{bot_username}?start={tg_id}"
-    text=f'{hide_link(data.instagram_bio_preview)}' + translates.your_link.format(link=link)
-    await mess.answer(text, parse_mode='HTML')
+    if await default_check(types.User.get_current()):
+        bot_username = (await bot.get_me()).username
+        user = types.User.get_current()
+        tg_id = user.id
+        link = f"https://t.me/{bot_username}?start={tg_id}"
+        text=f'{hide_link(data.instagram_bio_preview)}' + translates.your_link.format(link=link)
+        await mess.answer(text, parse_mode='HTML')
+
+
+'''@dp.message_handler(commands=["language"], state='*', chat_type=types.ChatType.PRIVATE)
+async def language(mess: types.Message):
+    if await default_check(types.User.get_current()):
+        user_in_db = await postgres.get_user_by_tg_id(types.User.get_current().id)
+        if not await postgres.get_user_language(user_in_db.tg_id) == "ru":
+            keyboard = await keyboards.language_keyboard(user_id=user_in_db.id, current_locale=0)
+        else:
+            keyboard = await keyboards.language_keyboard(user_id=user_in_db.id, current_locale=1)
+        await mess.answer(text=translates.current_language, reply_markup=keyboard)
+
+async def change_language(call: types.CallbackQuery, id, extra_data,  **kwargs):
+    if await default_check(types.User.get_current()):
+        await call.answer()
+        user_in_db = await postgres.get_user(int(id))
+        if int(extra_data) == 0:
+            locale = "uk"
+        else:
+            locale = "ru"
+
+        if not  user_in_db.language == locale:
+            await user_in_db.update(language=locale).apply()
+
+            if locale == "uk":
+                keyboard = await keyboards.language_keyboard(user_id=user_in_db.id, current_locale=0)
+            else:
+                keyboard = await keyboards.language_keyboard(user_id=user_in_db.id, current_locale=1)
+            await call.message.edit_text(text=translates.current_language, reply_markup=keyboard)
+
+async def close_language(call: types.CallbackQuery, **kwargs):
+    if await default_check(types.User.get_current()):
+        try:
+           await call.message.delete()
+        except:
+            await call.message.delete_reply_markup()'''
 
 
 @dp.message_handler(state=states.Letter.startpoint)
@@ -913,6 +950,8 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
         '10': remove_photo_from_text,
         '11': disable_preview,
         '12': enable_preview,
+        '13': change_language,
+        '14': close_language,
 
 
     }
