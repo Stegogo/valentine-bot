@@ -14,12 +14,14 @@ import data
 import keyboards
 import states
 import translates
-from data import moder_chat_id
+
 from main import bot, dp
 from keyboards import menu_cd, is_correct_keyboard, check_markup, reject_keyboard
 from aiogram import types, Dispatcher
 import postgres
 import models
+
+
 
 '''
 @dp.message_handler()
@@ -123,7 +125,8 @@ async def my_link(mess: types.Message):
         user = types.User.get_current()
         tg_id = user.id
         link = f"https://t.me/{bot_username}?start={tg_id}"
-        text=f'{hide_link(data.instagram_bio_preview)}' + translates.your_link.format(link=link)
+        settings = await postgres.get_settings()
+        text=f'{hide_link(settings.instagram_bio_preview)}' + translates.your_link.format(link=link)
         await mess.answer(text, parse_mode='HTML')
 
 
@@ -659,25 +662,28 @@ async def process_callback_button3(callback_query: types.CallbackQuery, id, **kw
 
 async def scan_queue():
     checking_letters = await postgres.count_checking_letters()
+    settings = await postgres.get_settings()
+    if settings.is_send_to_moders:
+        letter = await postgres.get_letter_in_queue()
+        if letter:
+            if checking_letters < 3:
+                letter.status = "CHECKING"
+                moder_chat_id = (await postgres.get_settings()).moder_chat_id
+                admin_mess_1 = await bot.send_message(chat_id=moder_chat_id, text=await get_admin_message_text(letter),
+                                                      parse_mode="HTML")
+                await send_letter(letter, chat_id=moder_chat_id)
+                letter.admin_message_id = admin_mess_1.message_id
+                await letter.update(admin_message_id=admin_mess_1.message_id, status="CHECKING").apply()
 
-    letter = await postgres.get_letter_in_queue()
-    if letter:
-        if checking_letters < 3:
-            letter.status = "CHECKING"
-            admin_mess_1 = await bot.send_message(chat_id=data.moder_chat_id, text=await get_admin_message_text(letter),
-                                                  parse_mode="HTML")
-            await send_letter(letter, chat_id=data.moder_chat_id)
-            letter.admin_message_id = admin_mess_1.message_id
-            await letter.update(admin_message_id=admin_mess_1.message_id, status="CHECKING").apply()
-
-            markup = await keyboards.check_markup(letter=letter)
-            text = "Что сделать?"
-            if letter.recipient_username == None and letter.recipient_id != None:
-                userbot = await postgres.get_user_by_tg_id(data.userbot_id)
-                text += f"\nЧтоб отправить сообщение этому юзеру, {userbot.fullname} должен вручную начать диалог. Когда чат будет создан, {userbot.fullname} должен нажать кнопку ниже"
-            await bot.send_message(chat_id=data.moder_chat_id, text=text, reply_markup=markup)
-        else:
-            await bot.send_message(chat_id=data.moder_chat_id, text="Обработайте валентинки, в очереди есть еще")
+                markup = await keyboards.check_markup(letter=letter)
+                text = "Что сделать?"
+                if letter.recipient_username == None and letter.recipient_id != None:
+                    userbot = await postgres.get_user_by_tg_id(data.userbot_id)
+                    text += f"\nЧтоб отправить сообщение этому юзеру, {userbot.fullname} должен вручную начать диалог. Когда чат будет создан, {userbot.fullname} должен нажать кнопку ниже"
+                await bot.send_message(chat_id=moder_chat_id, text=text, reply_markup=markup)
+            else:
+                moder_chat_id = (await postgres.get_settings()).moder_chat_id
+                await bot.send_message(chat_id=moder_chat_id, text="Обработайте валентинки, в очереди есть еще")
 
 
 
@@ -743,8 +749,8 @@ async def add_receiver_contact(message: types.Message, state: FSMContext):
                 await message.answer("Ошибка. Пришли мне юзернейм или айди получателя", reply=message.message_id)
                 return
 
-
-            await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id), text=await get_admin_message_text(letter), parse_mode="HTML")
+            moder_chat_id = (await postgres.get_settings()).moder_chat_id
+            await bot.edit_message_text(chat_id=moder_chat_id, message_id=int(letter.admin_message_id), text=await get_admin_message_text(letter), parse_mode="HTML")
             if message.reply_to_message != None:
                 keyboard = await keyboards.check_markup(letter)
                 await message.reply_to_message.edit_text("Что сделать?", reply_markup=keyboard)
@@ -768,8 +774,8 @@ async def reject_text(message: types.Message, state: FSMContext):
 
             await bot.send_message(chat_id=letter.sender_id, text=translates.reject.format(reject_reason=letter.reject_reason),
                                    reply_to_message_id=letter.sender_message_id)
-
-            await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id), text=await get_admin_message_text(letter), parse_mode="HTML")
+            moder_chat_id = (await postgres.get_settings()).moder_chat_id
+            await bot.edit_message_text(chat_id=moder_chat_id, message_id=int(letter.admin_message_id), text=await get_admin_message_text(letter), parse_mode="HTML")
             if message.reply_to_message != None:
                 await message.reply_to_message.edit_text("Валентинка відхилена")
             await message.answer(text="Отправлено", reply=message.message_id)
@@ -830,8 +836,8 @@ async def approve_letter(call: types.CallbackQuery, id, extra_data, **kwargs):
                     file = await send_letter(letter=letter, chat_id=data.userbot_id)
                     await bot.send_message(chat_id=data.userbot_id, text=f"/#l:{letter.id}",
                                            reply_to_message_id=file.message_id)
-
-                await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id),
+                moder_chat_id = (await postgres.get_settings()).moder_chat_id
+                await bot.edit_message_text(chat_id=moder_chat_id, message_id=int(letter.admin_message_id),
                                             text=await get_admin_message_text(letter), parse_mode="HTML")
             except RetryAfter as e:
                 print(e)
@@ -841,7 +847,7 @@ async def approve_letter(call: types.CallbackQuery, id, extra_data, **kwargs):
                                             show_alert=True)
 
 #@dp.message_handler(lambda message: message.chat_id == data.moder_chat_id, commands=["add_admin"], chat_type=types.ChatType.GROUP)
-@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["add_admin"])
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["add_admin"])
 async def add_admin(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         message_array = mess.text.split(" ")
@@ -880,7 +886,7 @@ async def add_admin(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["del_admin"])
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["del_admin"])
 async def del_admin(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
@@ -918,7 +924,78 @@ async def del_admin(mess: types.Message):
         except RetryAfter as e:
             print(e)
 
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["start_queue"])
+async def start_queue(mess: types.Message):
+    if await default_check(types.User.get_current(), admin=True):
+        try:
+            settings = await postgres.get_settings()
+            if settings:
+                if settings.is_send_to_moders:
+                    await mess.answer(f"Валентинки и так присылаются", reply=mess.message_id)
+                else:
+                    await settings.update(is_send_to_moders=True)
+                    await mess.answer(f"Теперь валентинки из очереди будут присылаться в чат админов", reply=mess.message_id)
 
+        except RetryAfter as e:
+            print(e)
+
+
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["stop_queue"])
+async def stop_queue(mess: types.Message):
+    if await default_check(types.User.get_current(), admin=True):
+        try:
+            settings = await postgres.get_settings()
+            if settings:
+                if not settings.is_send_to_moders:
+                    await mess.answer(f"Валентинки и так не присылаются", reply=mess.message_id)
+                else:
+                    await settings.update(is_send_to_moders=False)
+                    await mess.answer(f"Теперь валентинки из очереди не будут присылаться в чат админов",
+                                      reply=mess.message_id)
+
+        except RetryAfter as e:
+            print(e)
+
+
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["change_moder_chat_id"])
+async def change_moder_chat_id(mess: types.Message):
+    if await default_check(types.User.get_current(), admin=True):
+        try:
+            settings = await postgres.get_settings()
+            message_array = mess.text.split(" ")
+            moder_chat_id = message_array[-1]
+            if moder_chat_id.isdigit():
+                if int(moder_chat_id) == settings.moder_chat_id:
+                    await mess.answer(f'Это и так чат модераторов', parse_mode="HTML",
+                                      reply=mess.message_id)
+                else:
+                    settings.moder_chat_id = int(moder_chat_id)
+                    await settings.update(moder_chat_id = int(moder_chat_id)).apply()
+                    await mess.answer(f'Чат модераторов изменен, новые валентинки будут приходить туда', parse_mode="HTML",
+                                      reply=mess.message_id)
+
+            else:
+                await mess.answer("Формат команды <code>/del_admin id_or_username</code>", reply=mess.message_id,
+                                  parse_mode="HTML")
+        except RetryAfter as e:
+            print(e)
+
+
+@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["stop_queue"])
+async def stop_queue(mess: types.Message):
+    if await default_check(types.User.get_current(), admin=True):
+        try:
+            settings = await postgres.get_settings()
+            if settings:
+                if not settings.is_send_to_moders:
+                    await mess.answer(f"Валентинки и так не присылаются", reply=mess.message_id)
+                else:
+                    await settings.update(is_send_to_moders=False)
+                    await mess.answer(f"Теперь валентинки из очереди не будут присылаться в чат админов",
+                                      reply=mess.message_id)
+
+        except RetryAfter as e:
+            print(e)
 
 async def admin_menu(call: types.CallbackQuery, id, **kwargs):
     if await default_check(types.User.get_current(), admin=True):
@@ -981,6 +1058,7 @@ async def default_check(user, admin=False):
 @dp.message_handler(lambda msg: msg.from_user.id == data.userbot_id)
 async def userbot_connect(message: types.Message):
     if await default_check(types.User.get_current(), admin=True):
+        moder_chat_id = (await postgres.get_settings()).moder_chat_id
         if message.text.startswith("/#"):
             message_dict = message.text[2:].split(":")
             if message_dict[0] == "ls":
@@ -1006,7 +1084,7 @@ async def userbot_connect(message: types.Message):
 
 
 
-                await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id),
+                await bot.edit_message_text(chat_id=moder_chat_id, message_id=int(letter.admin_message_id),
                                             text=await get_admin_message_text(letter), parse_mode="HTML")
                 await bot.send_message(chat_id=letter.sender_id,
                                        text=translates.error_letter_delivery,
@@ -1080,11 +1158,16 @@ async def set_bot_commands():
                     BotCommand(command="del_admin", description=translates.del_admin_command),
                     BotCommand(command="new", description=translates.new_command),
                            BotCommand(command="my_link", description=translates.my_link_command),
+                           BotCommand(command="start_queue", description="Открыть обработку очереди"),
+                           BotCommand(command="stop_queue", description="Закрыть обработку очереди"),
+                           BotCommand(command="change_moder_chat_id", description="Смена чата модеров"),
                         ]
+    moder_chat_id = (await postgres.get_settings()).moder_chat_id
     await bot.set_my_commands(commands=commands_default, scope=BotCommandScopeDefault())
     await bot.set_my_commands(commands=commands_admin_chat, scope=BotCommandScopeChat(moder_chat_id))
 
 async def dashboard():
+    moder_chat_id = (await postgres.get_settings()).moder_chat_id
     users_size = await postgres.count_users()
     bot_blocked_users = await postgres.count_bot_blocked_users()
     blocked_by_bot_users = await postgres.count_blocked_by_bot_users()
@@ -1106,15 +1189,16 @@ async def dashboard():
          f"Ошибка доставки: {error_letters}\nОтклонено: {rejected_letters}\nПроверено, но не доставлено: {approved_letters}\n\n" \
          f"Ответов в базе: {answers_size}\nУспешно доставлено: {delivered_answers}\nОшибка доставки: {error_answers}\nДоставляется: {sending_answers}"
     try:
-        await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=data.dashboard_message_id, text=text)
+        settings = await postgres.get_settings()
+        await bot.edit_message_text(chat_id=moder_chat_id, message_id=settings.dashboard_message_id, text=text)
     except AttributeError as e:
         print("error dashboard:")
         print(e)
-        mess =await bot.send_message(chat_id=data.moder_chat_id, text=text)
+        mess =await bot.send_message(chat_id=moder_chat_id, text=text)
         with open("data.py", 'a') as f:
             f.write(f'\ndashboard_message_id = {mess.message_id}')
             f.close()
-            await bot.send_message(chat_id=data.moder_chat_id, text="Файл data перезаписан, перезапусти бота")
+            await bot.send_message(chat_id=moder_chat_id, text="Файл data перезаписан, перезапусти бота")
             sys.exit()
     except MessageNotModified as e:
         pass

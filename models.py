@@ -55,3 +55,11 @@ class Answer(db.Model):
     file_id_bot = db.Column(db.String)
     file_id_userbot = db.Column(db.String)
 
+class Settings(db.Model):
+    __tablename__ = "settings"
+
+    id = db.Column(db.Integer, db.Sequence("settings_id_seq"), primary_key=True)
+    moder_chat_id = db.Column(db.BigInteger)
+    dashboard_message_id = db.Column(db.BigInteger)
+    instagram_bio_preview = db.Column(db.String)
+    is_send_to_moders = db.Column(db.Boolean)

@@ -18,6 +18,7 @@ import postgres
 async def on_startup(dispatcher):
     await postgres.startup()
     await set_bot_commands()
+    settings = await postgres.get_settings()
     now = datetime.datetime.now()
     scheduler = AsyncIOScheduler(timezone="Europe/Kiev")
 

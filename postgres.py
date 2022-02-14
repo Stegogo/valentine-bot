@@ -1,7 +1,7 @@
 from aiogram import types
 from sqlalchemy import and_
 
-from models import User, db, data, Letter, Answer
+from models import User, db, data, Letter, Answer, Settings
 
 
 async def startup():
@@ -29,9 +29,27 @@ async def get_user(id):
     user = await User.query.where(User.id == id).gino.first()
     return user
 
+
+
+async def get_settings():
+    settings = await Settings.query.where(Settings.id == 1).gino.first()
+    if not settings:
+        settings = Settings()
+        settings.id = 1
+        settings.moder_chat_id = data.moder_chat_id
+        settings.instagram_bio_preview = data.instagram_bio_preview
+        settings.is_send_to_moders = True
+        settings.dashboard_message_id = data.dashboard_message_id
+        await settings.create()
+    return settings
+
+
 async def get_user_language(id):
     user = await User.query.where(User.tg_id == id).gino.first()
-    return user.language
+    if user:
+        return user.language
+    else:
+        return None
 
 
 async def count_users():
