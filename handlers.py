@@ -24,7 +24,7 @@ import models
 
 
 
-@dp.message_handler(state="*")
+@dp.message_handler(state="*", chat_type=types.ChatType.PRIVATE)
 async def test(mess: types.Message):
     await mess.answer(text="День Святого Валентину скінчився, побачимось наступного року🥰")
 
