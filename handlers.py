@@ -847,7 +847,7 @@ async def approve_letter(call: types.CallbackQuery, id, extra_data, **kwargs):
                                             show_alert=True)
 
 #@dp.message_handler(lambda message: message.chat_id == data.moder_chat_id, commands=["add_admin"], chat_type=types.ChatType.GROUP)
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["add_admin"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["add_admin"])
 async def add_admin(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         message_array = mess.text.split(" ")
@@ -886,7 +886,7 @@ async def add_admin(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["del_admin"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["del_admin"])
 async def del_admin(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
@@ -924,7 +924,7 @@ async def del_admin(mess: types.Message):
         except RetryAfter as e:
             print(e)
 
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["start_queue"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["start_queue"])
 async def start_queue(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
@@ -940,7 +940,7 @@ async def start_queue(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["stop_queue"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["stop_queue"])
 async def stop_queue(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
@@ -957,7 +957,7 @@ async def stop_queue(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["change_moder_chat_id"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["change_moder_chat_id"])
 async def change_moder_chat_id(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
@@ -981,7 +981,7 @@ async def change_moder_chat_id(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == (await postgres.get_settings()).moder_chat_id, commands=["stop_queue"])
+@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["stop_queue"])
 async def stop_queue(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         try:
