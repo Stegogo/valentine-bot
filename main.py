@@ -11,7 +11,9 @@ tg_token = data.token
 storage = MemoryStorage()
 bot = Bot(token=tg_token)
 dp = Dispatcher(bot, storage=storage)
-
+from lang_middleware import setup_middleware
+i18n = setup_middleware(dp)
+_ = i18n.gettext
 import postgres
 async def on_startup(dispatcher):
     await postgres.startup()
@@ -23,6 +25,8 @@ async def on_startup(dispatcher):
     scheduler.add_job(handlers.scan_queue, 'interval', seconds=20)
     scheduler.start()
     print("Bot started")
+
+
 
 
 if __name__ == '__main__':

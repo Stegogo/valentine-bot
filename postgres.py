@@ -29,6 +29,11 @@ async def get_user(id):
     user = await User.query.where(User.id == id).gino.first()
     return user
 
+async def get_user_language(id):
+    user = await User.query.where(User.tg_id == id).gino.first()
+    return user.language
+
+
 async def count_users():
     return await db.func.count(User.id).gino.scalar()
 
@@ -122,7 +127,7 @@ async def get_file_id(answer, reply_to_message):
 
 
     if answer.type == "PHOTO":
-        file_id = reply_to_message.photo.file_id
+        file_id = reply_to_message.photo[-1].file_id
     elif answer.type == 'VIDEO':
         file_id = reply_to_message.video.file_id
     elif answer.type == 'ANIMATION':

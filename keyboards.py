@@ -2,7 +2,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types
 from aiogram.utils.callback_data import CallbackData
 import models
-
+import translates
 
 menu_cd = CallbackData("show_menu", "level", "id", "extra_data")
 
@@ -21,23 +21,37 @@ async def add_contact_keyboard(letter):
 
     return keyboard
 
+async def language_keyboard(user_id, current_locale):
+    keyboard = InlineKeyboardMarkup(row_width=2)
+    if current_locale == 0:
+        keyboard.row(InlineKeyboardButton(text='🇺🇦Українська✅', callback_data=make_callback_data(level=13, id=user_id, extra_data=0)),
+                     InlineKeyboardButton(text='🇷🇺Русский', callback_data=make_callback_data(level=13, id=user_id, extra_data=1)))
+    else:
+        keyboard.row(InlineKeyboardButton(text='🇺🇦Українська', callback_data=make_callback_data(level=13, id=user_id,
+                                                                                                  extra_data=0)),
+                     InlineKeyboardButton(text='🇷🇺Русский✅', callback_data=make_callback_data(level=13, id=user_id,
+                                                                                               extra_data=1)))
+    keyboard.row(InlineKeyboardButton(text=translates.close, callback_data=make_callback_data(level=14)))
+
+    return keyboard
+
 async def is_correct_keyboard(letter, letter_preview_id):
     keyboard = InlineKeyboardMarkup(row_width=1)
-    keyboard.row(types.InlineKeyboardButton(text='Изменить получателя', callback_data=make_callback_data(level=1, id=letter.id)))
-    keyboard.row(types.InlineKeyboardButton(text='Изменить валентинку', callback_data=make_callback_data(level=2, id=letter.id)))
+    keyboard.row(types.InlineKeyboardButton(text=translates.button_change_recipient, callback_data=make_callback_data(level=1, id=letter.id)))
+    keyboard.row(types.InlineKeyboardButton(text=translates.button_change_content, callback_data=make_callback_data(level=2, id=letter.id)))
 
     if letter.type == "TEXT":
         if '>&#8288;</a>' in letter.text:
-            keyboard.row(InlineKeyboardButton(text="Убрать фото", callback_data=make_callback_data(level=10, id=letter.id, extra_data=letter_preview_id)))
+            keyboard.row(InlineKeyboardButton(text=translates.button_del_photo, callback_data=make_callback_data(level=10, id=letter.id, extra_data=letter_preview_id)))
         else:
-            keyboard.row(InlineKeyboardButton(text="Добавить фото", callback_data=make_callback_data(level=9, id=letter.id, extra_data=letter_preview_id)))
+            keyboard.row(InlineKeyboardButton(text=translates.button_add_photo, callback_data=make_callback_data(level=9, id=letter.id, extra_data=letter_preview_id)))
             if letter.link_preview == True and "a href=" in letter.text:
 
-                keyboard.row(InlineKeyboardButton(text="Выключить предпросмотр", callback_data=make_callback_data(level=11, id=letter.id, extra_data=letter_preview_id)))
+                keyboard.row(InlineKeyboardButton(text=translates.button_disable_preview, callback_data=make_callback_data(level=11, id=letter.id, extra_data=letter_preview_id)))
             elif letter.link_preview == False and "a href=" in letter.text:
 
-                keyboard.row(InlineKeyboardButton(text="Включить предпросмотр", callback_data=make_callback_data(level=12, id=letter.id, extra_data=letter_preview_id)))
-    keyboard.row(types.InlineKeyboardButton(text='Всё верно, отправить на проверку', callback_data=make_callback_data(level=3, id=letter.id)))
+                keyboard.row(InlineKeyboardButton(text=translates.button_enable_preview, callback_data=make_callback_data(level=12, id=letter.id, extra_data=letter_preview_id)))
+    keyboard.row(types.InlineKeyboardButton(text=translates.button_send_to_admins, callback_data=make_callback_data(level=3, id=letter.id)))
 
 
     return keyboard
