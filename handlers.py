@@ -971,7 +971,9 @@ async def change_moder_chat_id(mess: types.Message):
                                       reply=mess.message_id)
                 else:
                     settings.moder_chat_id = int(moder_chat_id)
-                    await settings.update(moder_chat_id = int(moder_chat_id)).apply()
+                    mess = await bot.send_message(chat_id=settings.moder_chat_id, text="new dashboard")
+                    settings.dashboard_message_id = mess.message_id
+                    await settings.update(moder_chat_id = int(moder_chat_id), dashboard_message_id = mess.message_id).apply()
                     await mess.answer(f'Чат модераторов изменен, новые валентинки будут приходить туда', parse_mode="HTML",
                                       reply=mess.message_id)
 
