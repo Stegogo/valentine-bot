@@ -965,7 +965,7 @@ async def change_moder_chat_id(mess: types.Message):
             settings = await postgres.get_settings()
             message_array = mess.text.split(" ")
             moder_chat_id = message_array[-1]
-            if moder_chat_id.isdigit():
+            if moder_chat_id.lstrip("-").isdigit():
                 if int(moder_chat_id) == settings.moder_chat_id:
                     await mess.answer(f'Это и так чат модераторов', parse_mode="HTML",
                                       reply=mess.message_id)
