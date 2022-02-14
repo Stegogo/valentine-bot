@@ -771,7 +771,7 @@ async def reject_text(message: types.Message, state: FSMContext):
 
             await bot.edit_message_text(chat_id=data.moder_chat_id, message_id=int(letter.admin_message_id), text=await get_admin_message_text(letter), parse_mode="HTML")
             if message.reply_to_message != None:
-                await message.reply_to_message.edit_text("Валентинка отклонена")
+                await message.reply_to_message.edit_text("Валентинка відхилена")
             await message.answer(text="Отправлено", reply=message.message_id)
 
             await state.reset_state()
