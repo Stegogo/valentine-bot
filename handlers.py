@@ -933,7 +933,7 @@ async def start_queue(mess: types.Message):
                 if settings.is_send_to_moders:
                     await mess.answer(f"Валентинки и так присылаются", reply=mess.message_id)
                 else:
-                    await settings.update(is_send_to_moders=True)
+                    await settings.update(is_send_to_moders=True).apply()
                     await mess.answer(f"Теперь валентинки из очереди будут присылаться в чат админов", reply=mess.message_id)
 
         except RetryAfter as e:
@@ -949,7 +949,7 @@ async def stop_queue(mess: types.Message):
                 if not settings.is_send_to_moders:
                     await mess.answer(f"Валентинки и так не присылаются", reply=mess.message_id)
                 else:
-                    await settings.update(is_send_to_moders=False)
+                    await settings.update(is_send_to_moders=False).apply()
                     await mess.answer(f"Теперь валентинки из очереди не будут присылаться в чат админов",
                                       reply=mess.message_id)
 
@@ -981,21 +981,7 @@ async def change_moder_chat_id(mess: types.Message):
             print(e)
 
 
-@dp.message_handler(lambda message: message.chat.id == data.moder_chat_id, commands=["stop_queue"])
-async def stop_queue(mess: types.Message):
-    if await default_check(types.User.get_current(), admin=True):
-        try:
-            settings = await postgres.get_settings()
-            if settings:
-                if not settings.is_send_to_moders:
-                    await mess.answer(f"Валентинки и так не присылаются", reply=mess.message_id)
-                else:
-                    await settings.update(is_send_to_moders=False)
-                    await mess.answer(f"Теперь валентинки из очереди не будут присылаться в чат админов",
-                                      reply=mess.message_id)
 
-        except RetryAfter as e:
-            print(e)
 
 async def admin_menu(call: types.CallbackQuery, id, **kwargs):
     if await default_check(types.User.get_current(), admin=True):
