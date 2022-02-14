@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-14 01:48+0200\n"
+"POT-Creation-Date: 2022-02-14 02:15+0200\n"
 "PO-Revision-Date: 2022-02-14 01:51+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -204,7 +204,7 @@ msgstr "Ответ не доставлен, скорее всего собесе
 
 #: translates.py:26
 msgid "Відповідь доставлена!"
-msgstr "Принято! Ответ доставлен!🙋"
+msgstr "Принято! Ответ доставлен! 🙋"
 
 #: translates.py:27
 msgid "Створити валентинку"

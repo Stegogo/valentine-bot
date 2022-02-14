@@ -4,7 +4,7 @@ from aiogram.contrib.middlewares.i18n import I18nMiddleware
 
 import postgres
 
-I18N_DOMAIN = 'valentinebot'
+I18N_DOMAIN = 'valentinesbot'
 LOCALES_DIR = 'locales'
 
 
