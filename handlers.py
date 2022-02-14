@@ -950,8 +950,8 @@ async def navigate(call: types.CallbackQuery, callback_data: dict):
         '10': remove_photo_from_text,
         '11': disable_preview,
         '12': enable_preview,
-        '13': change_language,
-        '14': close_language,
+
+
 
 
     }
