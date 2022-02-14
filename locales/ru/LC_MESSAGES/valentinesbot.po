@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-02-14 03:14+0200\n"
+"POT-Creation-Date: 2022-02-14 03:25+0200\n"
 "PO-Revision-Date: 2022-02-14 02:19+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -235,35 +235,38 @@ msgstr ""
 " Ответь на него, сделав реплай!"
 
 #: translates.py:33
-msgid "Изменить получателя"
-msgstr ""
+msgid "Змінити отримучвача"
+msgstr "Изменить получателя"
 
 #: translates.py:34
 #, fuzzy
-msgid "Изменить валентинку"
+msgid "Змінити валентинку"
 msgstr "Создать валентинку"
 
 #: translates.py:35
 msgid "Прибрати фото"
-msgstr ""
+msgstr "Убрать фото"
 
 #: translates.py:36
 msgid "Додати фото"
-msgstr ""
+msgstr "Добавить фото"
 
 #: translates.py:37
 msgid "Вимкнути попередній перегляд"
-msgstr ""
+msgstr "Выключить предпросмотр"
 
 #: translates.py:38
 msgid "Увімкнути попередній перегляд"
-msgstr ""
+msgstr "Включить предпросмотр"
 
 #: translates.py:39
 msgid "Усе вірно, відправити на перевірку"
-msgstr ""
+msgstr "Всё верно, отправить на проверку"
 
 #: translates.py:40
 msgid "Закрити"
-msgstr ""
+msgstr "Закрыть"
+
+#~ msgid "Изменить получателя"
+#~ msgstr ""
 
