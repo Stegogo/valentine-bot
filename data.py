@@ -3,7 +3,7 @@ host = "postgresql://ayjdkqmplfuqrm:12c98bfad6f20dd0438fa14ca1c00efa842a07bd61a9
 token = '5145738428:AAGYLxquo_YtDQ3jArFGolyBBHjj90CBNFU'
 
 moder_chat_id = -1001749130800
-userbot_id = 5176780860
+userbot_id = 838524205
 instagram_bio_preview="https://telegra.ph/file/0a78a38cbb97be128ef25.jpg"
 
 
