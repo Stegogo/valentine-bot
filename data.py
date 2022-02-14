@@ -4,7 +4,7 @@ token = '5145738428:AAGYLxquo_YtDQ3jArFGolyBBHjj90CBNFU'
 
 moder_chat_id = -1001749130800
 userbot_id = 838524205
-
+instagram_bio_preview="https://telegra.ph/file/0a78a38cbb97be128ef25.jpg"
 
 
 dashboard_message_id = 1447

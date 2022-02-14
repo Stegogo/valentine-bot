@@ -21,7 +21,7 @@ class ACLMiddleware(I18nMiddleware):
             tg_locale =  user.language_code
         else:
             tg_locale =  'uk'
-        print(tg_locale)
+
         return db_locale or tg_locale
 
 def setup_middleware(dp):

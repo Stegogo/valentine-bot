@@ -1175,7 +1175,7 @@ async def send_answer(answer, chat_id = None, reply = True):
 @dp.message_handler(lambda msg: msg.reply_to_message !=None, chat_type=types.ChatType.PRIVATE, content_types=types.ContentTypes.TEXT)
 async def user_reply_text(message: types.Message, state: FSMContext):
     if await default_check(types.User.get_current()):
-            print(message.chat.id)
+
             type = "TEXT"
             text = message.parse_entities()
             sender_id = message.from_user.id
@@ -1222,7 +1222,7 @@ async def user_reply_text(message: types.Message, state: FSMContext):
             to_message_recipient = answered_to.sender_message_id
 
             answer.type = type
-            print(type)
+
             if answer.type == "STICKER":
                 answer.file_id_bot = message.sticker.file_id
             elif answer.type == "PHOTO":
