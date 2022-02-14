@@ -23,12 +23,10 @@ import models
 
 
 
-'''
-@dp.message_handler()
+
+@dp.message_handler(state="*")
 async def test(mess: types.Message):
-    text = mess.text
-    chat = await bot.get_chat(text)
-    print(chat)'''
+    await mess.answer(text="День Святого Валентину скінчився, побачимось наступного року🥰")
 
 @dp.message_handler(commands=["test_letter"])
 async def test_letter(message: types.Message):
