@@ -27,7 +27,7 @@ async def mailing(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
         await mess.answer("mailing...")
         users = await postgres.get_all_users()
-        text = "Привіт! У цей складний для нашої країни час є дуже багато людей, які потребують не лише фінансової, а й словесної допомоги. " \
+        text = "привіт! У цей складний для нашої країни час є дуже багато людей, які потребують не лише фінансової, а й словесної допомоги. " \
                "Через провал планів Путіна, він почав бомбити мирні міста для того, щоб залякати людей.  " \
                "Вже зруйновано багато будинків, шкіл, лікарень і він не збирається зупинятися.  " \
                "Але в нього нічого не вийде!  Бо ми – сильна нація, ми – Українці!  " \
@@ -43,7 +43,7 @@ async def mailing(mess: types.Message):
         for user in users:
             if user.tg_id == 243568187:
                 try:
-                    await bot.send_message(user.tg_id, text=text)
+                    await bot.send_message(user.tg_id, text=f"{user.firstname}, "+text)
                     succesfull_mails+=1
                     await asyncio.sleep(1)
                 except:
@@ -70,7 +70,7 @@ async def mailing(mess: types.Message):
         unsuccessful_mails = 0
         for user in users:
             try:
-                await bot.send_message(user.tg_id, text=text)
+                await bot.send_message(user.tg_id, text=f"{user.firstname}, "+text)
                 succesfull_mails += 1
                 await asyncio.sleep(1)
             except:
