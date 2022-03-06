@@ -1,6 +1,8 @@
 import datetime
 
 from aiogram import Bot, Dispatcher, executor
+from aiogram.types import ParseMode
+
 import data
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -9,7 +11,7 @@ import handlers
 tg_token = data.token
 
 storage = MemoryStorage()
-bot = Bot(token=tg_token)
+bot = Bot(token=tg_token, parse_mode=ParseMode.HTML)
 dp = Dispatcher(bot, storage=storage)
 from lang_middleware import setup_middleware
 i18n = setup_middleware(dp)

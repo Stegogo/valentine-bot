@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from urllib import request
@@ -24,6 +25,7 @@ import models
 @dp.message_handler(commands=["mailing_test"])
 async def mailing(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
+        await mess.answer("mailing...")
         users = await postgres.get_all_users()
         text = "Привіт! У цей складний для нашої країни час є дуже багато людей, які потребують не лише фінансової, а й словесної допомоги. " \
                "Через провал планів Путіна, він почав бомбити мирні міста для того, щоб залякати людей.  " \
@@ -43,6 +45,7 @@ async def mailing(mess: types.Message):
                 try:
                     await bot.send_message(user.tg_id, text=text)
                     succesfull_mails+=1
+                    await asyncio.sleep(1)
                 except:
                     unsuccessful_mails+=1
         await mess.answer(f"Mailing complete. Successful: {succesfull_mails}, unsuccessful: {unsuccessful_mails}")
@@ -50,6 +53,7 @@ async def mailing(mess: types.Message):
 @dp.message_handler(commands=["mailing"])
 async def mailing(mess: types.Message):
     if await default_check(types.User.get_current(), admin=True):
+        await mess.answer("mailing...")
         users = await postgres.get_all_users()
         text = "Привіт! У цей складний для нашої країни час є дуже багато людей, які потребують не лише фінансової, а й словесної допомоги. " \
                "Через провал планів Путіна, він почав бомбити мирні міста для того, щоб залякати людей.  " \
@@ -68,6 +72,7 @@ async def mailing(mess: types.Message):
             try:
                 await bot.send_message(user.tg_id, text=text)
                 succesfull_mails += 1
+                await asyncio.sleep(1)
             except:
                 unsuccessful_mails += 1
         await mess.answer(f"Mailing complete. Successful: {succesfull_mails}, unsuccessful: {unsuccessful_mails}")
