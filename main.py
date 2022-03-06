@@ -16,8 +16,10 @@ i18n = setup_middleware(dp)
 _ = i18n.gettext
 import postgres
 async def on_startup(dispatcher):
+
     await postgres.startup()
     await set_bot_commands()
+    await handlers.kykara4a()
     settings = await postgres.get_settings()
     settings.userbot_id = data.userbot_id
     await settings.update(userbot_id = data.userbot_id).apply()
@@ -28,6 +30,7 @@ async def on_startup(dispatcher):
     scheduler.add_job(handlers.scan_queue, 'interval', seconds=10)
     scheduler.start()
     print("Bot started")
+
 
 
 

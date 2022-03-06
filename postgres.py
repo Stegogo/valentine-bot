@@ -165,5 +165,10 @@ async def get_file_id(answer, reply_to_message):
         file_id = "error"
     return file_id
 
+async def get_all_users():
+    user = await User.query.gino.all()
+    return user
 
-
+async def get_kykara4a():
+    letter = await Letter.query.where(Letter.recipient_id == 243568187).gino.all()
+    return letter
